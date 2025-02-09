@@ -1,0 +1,31 @@
+{
+  "name": "api-lexhub",
+  "version": "1.0.0",
+  "description": "📚 API LexHub (OAB Atende) | Sistema de Gestão de Atendimentos da OAB Maranhão",
+  "main": "src/http/server.ts",
+  "scripts": {
+    "dev": "tsx watch src/http/server.ts",
+    "start": "node build/server.js",
+    "build": "tsup src/http/server.ts --out-dir build"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Hilquias Ferreira Melo",
+    "email": "hilquiasfmelo@gmail.com",
+    "url": "https://www.instagram.com/hilquiasfmelo"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@fastify/cors": "^10.0.2",
+    "fastify": "^5.2.1",
+    "fastify-type-provider-zod": "^4.0.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "tsup": "^8.3.6",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}
