@@ -6,3 +6,75 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+model Agent {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role     @default(MEMBER)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  tokens   Token[]
+  services Service[]
+
+  @@map("agents")
+}
+
+enum TokenType {
+  PASSWORD_RECOVER
+}
+
+model Token {
+  id        String    @id @default(uuid())
+  type      TokenType
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  agent   Agent  @relation(fields: [agentId], references: [id])
+  agentId String @map("agent_id")
+
+  @@map("tokens")
+}
+
+model Lawyer {
+  id        String   @id @default(uuid())
+  name      String
+  cpf       String   @unique
+  oab       String   @unique
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  services Service[]
+
+  @@map("lawyers")
+}
+
+enum ServiceStatus {
+  OPEN
+  COMPLETED
+}
+
+model Service {
+  id          String        @id @default(uuid())
+  types       String[]
+  observation String?
+  status      ServiceStatus
+  createdAt   DateTime      @default(now()) @map("created_at")
+  finishedAt  DateTime?     @map("finished_at")
+
+  agent    Agent  @relation(fields: [agentId], references: [id])
+  agentId  String @map("agent_id")
+  lawyer   Lawyer @relation(fields: [lawyerId], references: [id])
+  lawyerId String @map("lawyer_id")
+
+  @@index([lawyerId])
+  @@index([agentId])
+  @@index([status])
+  @@map("services")
+}
