@@ -3,8 +3,8 @@ services:
     image: bitnami/postgresql:latest
     container_name: api-lexhub
     environment:
-      - POSTGRESQL_USERNAME=hilquiasfmelo
-      - POSTGRESQL_PASSWORD=benjamin
+      - POSTGRESQL_USERNAME=docker
+      - POSTGRESQL_PASSWORD=docker
       - POSTGRESQL_DATABASE=db-lexhub
     ports:
       - "5432:5432"
