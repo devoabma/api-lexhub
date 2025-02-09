@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    container_name: api-lexhub
+    environment:
+      - POSTGRESQL_USERNAME=hilquiasfmelo
+      - POSTGRESQL_PASSWORD=benjamin
+      - POSTGRESQL_DATABASE=db-lexhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.postgres_data:/bitnami/postgresql
+    restart: unless-stopped
