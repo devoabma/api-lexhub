@@ -13,7 +13,8 @@
 		],
 		"include": [
 			"src/**/*.{js,ts,jsx,tsx}",
-			"prisma/**/*.prisma"
+			"prisma/**/*.prisma",
+			"prisma/**/*.ts"
 		]
 	},
 	"formatter": {
