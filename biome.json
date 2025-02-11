@@ -10,11 +10,6 @@
 		"ignore": [
 			"node_modules",
 			"build"
-		],
-		"include": [
-			"src/**/*.{js,ts,jsx,tsx}",
-			"prisma/**/*.prisma",
-			"prisma/**/*.ts"
 		]
 	},
 	"formatter": {
