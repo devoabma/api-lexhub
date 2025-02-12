@@ -1,6 +1,6 @@
 import { PrismaClient, Role } from '@prisma/client'
 import { hash } from 'bcryptjs'
-import { env } from 'http/env'
+import { env } from 'http/_env'
 
 const prisma = new PrismaClient()
 

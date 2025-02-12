@@ -1,6 +1,7 @@
 import { compare } from 'bcryptjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { BadRequestError } from 'http/_errors/bad-request-error'
 import { prisma } from 'lib/prisma'
 import { z } from 'zod'
 
@@ -19,9 +20,6 @@ export async function authenticate(app: FastifyInstance) {
           201: z.object({
             token: z.string(),
           }),
-          400: z.object({
-            message: z.string(),
-          }),
         },
       },
     },
@@ -35,9 +33,7 @@ export async function authenticate(app: FastifyInstance) {
       })
 
       if (!userFromEmail) {
-        return reply.status(400).send({
-          message: 'Credenciais fornecidas inválidas.',
-        })
+        throw new BadRequestError('Credenciais fornecidas inválidas.')
       }
 
       const isPasswordValid = await compare(
@@ -46,9 +42,7 @@ export async function authenticate(app: FastifyInstance) {
       )
 
       if (!isPasswordValid) {
-        return reply.status(400).send({
-          message: 'Credenciais fornecidas inválidas.',
-        })
+        throw new BadRequestError('Credenciais fornecidas inválidas.')
       }
 
       // Criação do token de autenticação

@@ -9,7 +9,8 @@ import {
   serializerCompiler,
   validatorCompiler,
 } from 'fastify-type-provider-zod'
-import { env } from './env'
+import { env } from './_env'
+import { errorHandler } from './_errors'
 import { routes } from './routes'
 
 export const app = fastify().withTypeProvider<ZodTypeProvider>()
@@ -17,6 +18,10 @@ export const app = fastify().withTypeProvider<ZodTypeProvider>()
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
 
+// Configura o tratamento de erros globais da API
+app.setErrorHandler(errorHandler)
+
+// Configura o swagger para documentação da API
 app.register(fastifySwagger, {
   openapi: {
     info: {
@@ -31,7 +36,7 @@ app.register(fastifySwagger, {
 })
 
 app.register(fastifySwaggerUi, {
-  routePrefix: '/docs',
+  routePrefix: '/docs', // rota para acessar a documentação
 })
 
 app.register(fastifyJwt, {

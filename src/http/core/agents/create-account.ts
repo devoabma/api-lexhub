@@ -1,6 +1,7 @@
 import { hash } from 'bcryptjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { BadRequestError } from 'http/_errors/bad-request-error'
 import { prisma } from 'lib/prisma'
 import { z } from 'zod'
 
@@ -18,9 +19,6 @@ export async function createAccountService(app: FastifyInstance) {
         }),
         response: {
           201: z.object({}),
-          400: z.object({
-            message: z.string(),
-          }),
         },
       },
     },
@@ -34,9 +32,9 @@ export async function createAccountService(app: FastifyInstance) {
       })
 
       if (userWithSameEmail) {
-        return reply.status(400).send({
-          message: 'Já existe um funcionário cadastrado com esse e-mail.',
-        })
+        throw new BadRequestError(
+          'Já existe um funcionário cadastrado com esse e-mail.'
+        )
       }
 
       const passwordHash = await hash(password_hash, 8)
