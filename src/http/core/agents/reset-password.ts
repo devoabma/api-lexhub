@@ -1,4 +1,4 @@
-import { hash } from 'bcryptjs'
+import { compare, hash } from 'bcryptjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
@@ -27,13 +27,33 @@ export async function resetPassword(app: FastifyInstance) {
       // Verifica se o código de redefinição de senha é válido
       const tokenFromCode = await prisma.token.findUnique({
         where: {
-          id: code,
+          code,
         },
       })
 
       if (!tokenFromCode) {
         throw new UnauthorizedError(
           '🚨 Código de redefinição de senha inválido.'
+        )
+      }
+
+      // Busca o funcionário associado ao token
+      const agent = await prisma.agent.findUnique({
+        where: {
+          id: tokenFromCode.agentId,
+        },
+      })
+
+      if (!agent) {
+        throw new UnauthorizedError('🚨 Agente não encontrado.')
+      }
+
+      // Verifica se a nova senha é igual à senha atual
+      const isSamePassword = await compare(password, agent.passwordHash)
+
+      if (isSamePassword) {
+        throw new UnauthorizedError(
+          '🚨 Nova senha deve ser diferente da senha atual.'
         )
       }
 

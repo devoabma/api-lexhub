@@ -8,6 +8,8 @@ const envSchema = z.object({
   PASSWORD_ADMIN_FULL: z.string().min(8),
   EMAIL_ADMIN_FULL: z.string().email(),
   JWT_SECRET: z.string().min(8),
+  RESEND_API_KEY: z.string(),
+  WEB_URL: z.string().url(),
 })
 
 const _env = envSchema.safeParse(process.env)

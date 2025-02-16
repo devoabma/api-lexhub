@@ -1,6 +1,10 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { env } from 'http/_env'
 import { prisma } from 'lib/prisma'
+import { resend } from 'lib/resend'
+import { ResetPasswordEmail } from 'utils/emails/reset-password-email'
+import { generateRecoveryCode } from 'utils/generate-recovery-code'
 import { z } from 'zod'
 
 export async function requestPasswordRecover(app: FastifyInstance) {
@@ -32,19 +36,33 @@ export async function requestPasswordRecover(app: FastifyInstance) {
         return reply.status(200).send()
       }
 
-      const { id: code } = await prisma.token.create({
+      const { code } = await prisma.token.create({
         data: {
           type: 'PASSWORD_RECOVER',
           agentId: agentFromEmail.id,
+          code: generateRecoveryCode(),
         },
       })
 
-      // TODO: Enviar email de redefinição de senha com o Resend
+      await resend.emails.send({
+        from: '📧 OAB Atende <oabatende@oabma.com.br>',
+        // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
+        to: env.NODE_ENV === 'PRODUCTION' ? email : 'hilquiasfmelo@hotmail.com',
+        subject: 'Redefinição de Senha - OAB Atende 🔄',
+        react: ResetPasswordEmail({
+          name: agentFromEmail.name,
+          code,
+          link: `${env.WEB_URL}/agents/password/reset?code=${code}`,
+        }),
+      })
 
-      console.log(
-        '> ✅ Email de redefinição de senha enviado com sucesso.',
-        code
-      )
+      // Somente em ambiente de desenvolvimento mostra no console
+      if (env.NODE_ENV === 'DEVELOPMENT') {
+        console.log(
+          '> ✅ Email de redefinição de senha enviado com sucesso.',
+          code
+        )
+      }
 
       return reply.status(200).send()
     }

@@ -6,6 +6,7 @@
     "@types/*.d.ts"
   ],
   "compilerOptions": {
+    "jsx": "preserve",
     "lib": [
       "es2023"
     ],
