@@ -19,17 +19,19 @@ export async function createAccountService(app: FastifyInstance) {
         schema: {
           tags: ['agents'],
           summary: 'Criação de um novo funcionário',
+          security: [{ bearerAuth: [] }],
           body: z.object({
             name: z.string(),
             email: z.string().email(),
             password: z.string().min(8),
           }),
           response: {
-            201: z.object({}),
+            201: z.null(),
           },
         },
       },
       async (request, reply) => {
+        // Somente admins podem criar um novo funcionário
         await request.checkIfAgentIsAdmin()
 
         const { name, email, password } = request.body
@@ -42,7 +44,7 @@ export async function createAccountService(app: FastifyInstance) {
 
         if (userWithSameEmail) {
           throw new BadRequestError(
-            'Já existe um funcionário cadastrado com esse e-mail.'
+            '🚨 Já existe um funcionário cadastrado com esse e-mail.'
           )
         }
 
@@ -63,15 +65,21 @@ export async function createAccountService(app: FastifyInstance) {
           }),
         })
 
-        await prisma.agent.create({
-          data: {
-            name,
-            email,
-            passwordHash,
-          },
-        })
+        try {
+          await prisma.agent.create({
+            data: {
+              name,
+              email,
+              passwordHash,
+            },
+          })
 
-        return reply.status(201).send()
+          return reply.status(201).send()
+        } catch (err) {
+          throw new BadRequestError(
+            '🚨 Houve um erro ao criar o funcionário, tente novamente mais tarde.'
+          )
+        }
       }
     )
 }

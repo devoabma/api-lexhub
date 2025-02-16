@@ -15,6 +15,7 @@ export async function getProfile(app: FastifyInstance) {
         schema: {
           tags: ['agents'],
           summary: 'Busca o perfil de um funcionário logado',
+          security: [{ bearerAuth: [] }],
           response: {
             200: z.object({
               agent: z.object({

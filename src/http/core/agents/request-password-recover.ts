@@ -14,6 +14,7 @@ export async function requestPasswordRecover(app: FastifyInstance) {
       schema: {
         tags: ['agents'],
         summary: 'Requisição de redefinição de senha',
+        security: [{ bearerAuth: [] }],
         body: z.object({
           email: z.string().email(),
         }),
@@ -48,7 +49,7 @@ export async function requestPasswordRecover(app: FastifyInstance) {
         from: '📧 OAB Atende <oabatende@oabma.com.br>',
         // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
         to: env.NODE_ENV === 'PRODUCTION' ? email : 'hilquiasfmelo@hotmail.com',
-        subject: 'Redefinição de Senha - OAB Atende 🔄',
+        subject: '🔄 Redefinição de Senha - OAB Atende',
         react: ResetPasswordEmail({
           name: agentFromEmail.name,
           code,

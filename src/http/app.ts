@@ -30,6 +30,16 @@ app.register(fastifySwagger, {
         '📚 API LexHub (OAB Atende) | Sistema de Gestão de Atendimentos da OAB Maranhão',
       version: '1.0.0',
     },
+    components: {
+      securitySchemes: {
+        // bearerAuth nome definido para o securitySchemes no swagger
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
     servers: [],
   },
   transform: jsonSchemaTransform,
