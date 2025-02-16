@@ -7,6 +7,7 @@ export const auth = fastifyPlugin(async (app: FastifyInstance) => {
   app.addHook('preHandler', async request => {
     request.getCurrentAgentId = async () => {
       try {
+        // Verifica se o token é valido e retorna o sub
         const { sub } = await request.jwtVerify<{ sub: string }>()
 
         return sub

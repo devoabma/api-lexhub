@@ -1,9 +1,12 @@
 import { hash } from 'bcryptjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { env } from 'http/_env'
 import { BadRequestError } from 'http/_errors/bad-request-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
+import { resend } from 'lib/resend'
+import { AgentRegistrationEmail } from 'utils/emails/agent-registration-email'
 import { z } from 'zod'
 
 export async function createAccountService(app: FastifyInstance) {
@@ -19,7 +22,7 @@ export async function createAccountService(app: FastifyInstance) {
           body: z.object({
             name: z.string(),
             email: z.string().email(),
-            password_hash: z.string().min(8),
+            password: z.string().min(8),
           }),
           response: {
             201: z.object({}),
@@ -29,7 +32,7 @@ export async function createAccountService(app: FastifyInstance) {
       async (request, reply) => {
         await request.checkIfAgentIsAdmin()
 
-        const { name, email, password_hash } = request.body
+        const { name, email, password } = request.body
 
         const userWithSameEmail = await prisma.agent.findUnique({
           where: {
@@ -43,7 +46,22 @@ export async function createAccountService(app: FastifyInstance) {
           )
         }
 
-        const passwordHash = await hash(password_hash, 8)
+        const passwordHash = await hash(password, 8)
+
+        // Envia email de boas vindas para o novo funcionário com seus dados
+        await resend.emails.send({
+          from: '📧 OAB Atende <oabatende@oabma.com.br>',
+          // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
+          to:
+            env.NODE_ENV === 'PRODUCTION' ? email : 'hilquiasfmelo@hotmail.com',
+          subject: '🎉 Bem-vindo à equipe! Aqui estão suas informações.',
+          react: AgentRegistrationEmail({
+            name,
+            email,
+            tempPassword: password,
+            link: env.WEB_URL,
+          }),
+        })
 
         await prisma.agent.create({
           data: {
