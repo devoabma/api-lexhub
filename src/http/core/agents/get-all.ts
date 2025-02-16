@@ -24,6 +24,7 @@ export async function getAll(app: FastifyInstance) {
                   name: z.string(),
                   email: z.string().email(),
                   role: z.enum(['ADMIN', 'MEMBER']),
+                  inactive: z.date().nullable(),
                 })
               ),
             }),
@@ -45,6 +46,7 @@ export async function getAll(app: FastifyInstance) {
               name: true,
               email: true,
               role: true,
+              inactive: true,
             },
             orderBy: [
               {
