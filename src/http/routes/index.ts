@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 
+import { activeAgent } from 'http/core/agents/active-agent'
 import { authenticate } from 'http/core/agents/authenticate'
 import { getAll } from 'http/core/agents/get-all'
 import { getProfile } from 'http/core/agents/get-profile'
@@ -7,9 +8,12 @@ import { inactiveAgent } from 'http/core/agents/inactive-agent'
 import { requestPasswordRecover } from 'http/core/agents/request-password-recover'
 import { resetPassword } from 'http/core/agents/reset-password'
 import { updateAgent } from 'http/core/agents/update-agent'
+import { createTypeService } from 'http/core/services/create-type-service'
+import { getAllTypesServices } from 'http/core/services/get-all-types-services'
 import { createAccountService } from '../core/agents/create-account'
 
 export async function routes(app: FastifyInstance) {
+  // Rotas de agents
   app.register(createAccountService)
   app.register(authenticate)
   app.register(getProfile)
@@ -18,4 +22,9 @@ export async function routes(app: FastifyInstance) {
   app.register(getAll)
   app.register(updateAgent)
   app.register(inactiveAgent)
+  app.register(activeAgent)
+
+  // Rotas de services
+  app.register(createTypeService)
+  app.register(getAllTypesServices)
 }

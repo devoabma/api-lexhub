@@ -25,6 +25,13 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
     })
   }
 
+  // TODO: Adicionar funcionalidade do RateLimit.
+  if (error.statusCode === 429) {
+    return reply.status(429).send({
+      message: 'Limite de requisições excedido. Tente novamente mais tarde.',
+    })
+  }
+
   console.error(error)
   // Enviar erro para alguma plataforma de observabilidade
   reply.status(500).send({

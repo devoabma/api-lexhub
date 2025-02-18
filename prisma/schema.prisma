@@ -23,7 +23,7 @@ model Agent {
   updatedAt    DateTime  @updatedAt @map("updated_at")
 
   tokens   Token[]
-  services Service[]
+  services Services[]
 
   @@map("agents")
 }
@@ -38,7 +38,7 @@ model Token {
   code      String    @unique @db.VarChar(6)
   createdAt DateTime  @default(now()) @map("created_at")
 
-  agent   Agent  @relation(fields: [agentId], references: [id])
+  agent   Agent  @relation(fields: [agentId], references: [id], onDelete: Cascade)
   agentId String @map("agent_id")
 
   @@map("tokens")
@@ -52,7 +52,7 @@ model Lawyer {
   email     String   @unique
   createdAt DateTime @default(now()) @map("created_at")
 
-  services Service[]
+  services Services[]
 
   @@map("lawyers")
 }
@@ -62,21 +62,50 @@ enum ServiceStatus {
   COMPLETED
 }
 
-model Service {
-  id          String        @id @default(uuid())
-  types       String[]
+enum AssistanceTypes {
+  PERSONALLY
+  REMOTE
+}
+
+model Services {
+  id          String          @id @default(uuid())
+  assistance  AssistanceTypes
   observation String?
   status      ServiceStatus
-  createdAt   DateTime      @default(now()) @map("created_at")
-  finishedAt  DateTime?     @map("finished_at")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  finishedAt  DateTime?       @map("finished_at")
 
   agent    Agent  @relation(fields: [agentId], references: [id])
   agentId  String @map("agent_id")
   lawyer   Lawyer @relation(fields: [lawyerId], references: [id])
   lawyerId String @map("lawyer_id")
 
+  serviceTypes ServiceServiceTypes[]
+
   @@index([lawyerId])
   @@index([agentId])
   @@index([status])
   @@map("services")
+}
+
+model ServiceTypes {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  updateAt  DateTime @updatedAt @map("updated_at")
+
+  services ServiceServiceTypes[]
+
+  @@map("service_types")
+}
+
+model ServiceServiceTypes {
+  service   Services @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  serviceId String   @map("service_id")
+
+  serviceType   ServiceTypes @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  serviceTypeId String       @map("service_type_id")
+
+  @@id([serviceId, serviceTypeId]) // Chave primária composta
+  @@map("service_service_types")
 }
