@@ -59,7 +59,7 @@ export async function authenticate(app: FastifyInstance) {
         },
         {
           sign: {
-            expiresIn: '1d',
+            expiresIn: '1m', // 1 minuto
           },
         }
       )

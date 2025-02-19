@@ -6,21 +6,27 @@ import { UnauthorizedError } from './unauthorized-error'
 type FastifyErrorHandler = FastifyInstance['errorHandler']
 
 export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
+  if (error.validation) {
+    return reply.status(400).send({
+      message: '🚨 Houve um erro na validação, verifique os dados enviados.',
+    })
+  }
+
   if (error instanceof ZodError) {
-    reply.status(400).send({
+    return reply.status(400).send({
       message: 'Houve um erro na validação, verifique os dados enviados.',
       errors: error.flatten().fieldErrors,
     })
   }
 
   if (error instanceof BadRequestError) {
-    reply.status(400).send({
+    return reply.status(400).send({
       message: error.message,
     })
   }
 
   if (error instanceof UnauthorizedError) {
-    reply.status(401).send({
+    return reply.status(401).send({
       message: error.message,
     })
   }
@@ -34,7 +40,7 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
 
   console.error(error)
   // Enviar erro para alguma plataforma de observabilidade
-  reply.status(500).send({
+  return reply.status(500).send({
     message: '🚨 Erro interno do servidor. Tente novamente mais tarde.',
   })
 }

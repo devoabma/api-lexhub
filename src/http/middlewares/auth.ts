@@ -13,27 +13,33 @@ export const auth = fastifyPlugin(async (app: FastifyInstance) => {
         return sub
       } catch {
         throw new UnauthorizedError(
-          '🚨 Não autorizado para realizar essa operação.'
+          '🚨 Token inválido ou expirado. Faça login novamente.'
         )
       }
     }
 
     request.checkIfAgentIsAdmin = async () => {
-      const { sub } = await request.jwtVerify<{ sub: string }>()
+      try {
+        const { sub } = await request.jwtVerify<{ sub: string }>()
 
-      const agent = await prisma.agent.findUnique({
-        where: {
-          id: sub,
-        },
-        select: {
-          role: true,
-        },
-      })
+        const agent = await prisma.agent.findUnique({
+          where: {
+            id: sub,
+          },
+          select: {
+            role: true,
+          },
+        })
 
-      // Se o agente não for encontrado ou não for um administrador, lança um erro
-      if (!agent || agent.role !== 'ADMIN') {
+        // Se o agente não for encontrado ou não for um administrador, lança um erro
+        if (!agent || agent.role !== 'ADMIN') {
+          throw new UnauthorizedError(
+            '🚨 Você não possui permissão para realizar essa operação.'
+          )
+        }
+      } catch {
         throw new UnauthorizedError(
-          '🚨 Você não possui permissão para realizar essa operação.'
+          '🚨 Token inválido ou expirado. Faça login novamente.'
         )
       }
     }

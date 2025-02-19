@@ -18,9 +18,6 @@ export const app = fastify().withTypeProvider<ZodTypeProvider>()
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
 
-// Configura o tratamento de erros globais da API
-app.setErrorHandler(errorHandler)
-
 // Configura o swagger para documentação da API
 app.register(fastifySwagger, {
   openapi: {
@@ -56,3 +53,6 @@ app.register(fastifyJwt, {
 app.register(fastifyCors)
 
 app.register(routes)
+
+// Configura o tratamento de erros globais da API
+app.setErrorHandler(errorHandler)

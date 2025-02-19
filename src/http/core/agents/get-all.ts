@@ -35,40 +35,34 @@ export async function getAll(app: FastifyInstance) {
         // Somente administradores podem listar todos os funcionários
         await request.checkIfAgentIsAdmin()
 
-        try {
-          const agents = await prisma.agent.findMany({
-            // Lista somente os funcionários com o papel de "MEMBER"
-            where: {
-              role: 'MEMBER',
+        const agents = await prisma.agent.findMany({
+          // Lista somente os funcionários com o papel de "MEMBER"
+          where: {
+            role: 'MEMBER',
+          },
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            inactive: true,
+          },
+          orderBy: [
+            {
+              createdAt: 'desc', // Mostra os funcionários mais recentes primeiro
             },
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-              inactive: true,
-            },
-            orderBy: [
-              {
-                createdAt: 'desc', // Mostra os funcionários mais recentes primeiro
-              },
-            ],
-          })
+          ],
+        })
 
-          if (!agents) {
-            throw new BadRequestError(
-              '🚨 Ainda não existem funcionários cadastrados.'
-            )
-          }
-
-          return reply.status(200).send({
-            agents,
-          })
-        } catch (err) {
+        if (!agents) {
           throw new BadRequestError(
-            '🚨 Houve um erro ao buscar os funcionários.'
+            '🚨 Ainda não existem funcionários cadastrados.'
           )
         }
+
+        return reply.status(200).send({
+          agents,
+        })
       }
     )
 }
