@@ -77,7 +77,7 @@ export async function createAccountService(app: FastifyInstance) {
           return reply.status(201).send()
         } catch (err) {
           throw new BadRequestError(
-            '🚨 Houve um erro ao criar o funcionário, tente novamente mais tarde.'
+            '🚨 Ocorreu um erro ao tentar criar o funcionário. Por favor, tente novamente mais tarde.'
           )
         }
       }

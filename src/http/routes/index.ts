@@ -10,6 +10,7 @@ import { resetPassword } from 'http/core/agents/reset-password'
 import { updateAgent } from 'http/core/agents/update-agent'
 import { createTypeService } from 'http/core/services/create-type-service'
 import { getAllTypesServices } from 'http/core/services/get-all-types-services'
+import { updateTypeService } from 'http/core/services/update-type-service'
 import { createAccountService } from '../core/agents/create-account'
 
 export async function routes(app: FastifyInstance) {
@@ -24,7 +25,8 @@ export async function routes(app: FastifyInstance) {
   app.register(inactiveAgent)
   app.register(activeAgent)
 
-  // Rotas de services
+  // Rotas de services types
   app.register(createTypeService)
   app.register(getAllTypesServices)
+  app.register(updateTypeService)
 }

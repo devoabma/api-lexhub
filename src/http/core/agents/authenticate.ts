@@ -35,12 +35,14 @@ export async function authenticate(app: FastifyInstance) {
       // Verifica se o usuário foi desativado pelo administrador
       if (userFromEmail && userFromEmail.inactive !== null) {
         throw new BadRequestError(
-          '🚨 Funcionário inativo, procure o administrador do sistema.'
+          '🚨 O funcionário está inativo. Por favor, entre em contato com o administrador do sistema para mais informações.'
         )
       }
 
       if (!userFromEmail) {
-        throw new BadRequestError('🚨 Credenciais fornecidas inválidas.')
+        throw new BadRequestError(
+          '🚨 As credenciais fornecidas são inválidas. Por favor, verifique suas informações e tente novamente.'
+        )
       }
 
       const isPasswordValid = await compare(
@@ -49,17 +51,20 @@ export async function authenticate(app: FastifyInstance) {
       )
 
       if (!isPasswordValid) {
-        throw new BadRequestError('🚨 Credenciais fornecidas inválidas.')
+        throw new BadRequestError(
+          '🚨 As credenciais fornecidas são inválidas. Por favor, verifique suas informações e tente novamente.'
+        )
       }
 
       // Criação do token de autenticação
       const token = await reply.jwtSign(
         {
+          // Envia o id do usuário para o token
           sub: userFromEmail.id,
         },
         {
           sign: {
-            expiresIn: '1m', // 1 minuto
+            expiresIn: '1d',
           },
         }
       )

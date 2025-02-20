@@ -41,7 +41,9 @@ export async function updateAgent(app: FastifyInstance) {
         })
 
         if (!agent) {
-          throw new UnauthorizedError('🚨 Funcionário não encontrado.')
+          throw new UnauthorizedError(
+            '🚨 O funcionário solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
+          )
         }
 
         // Verifica se o e-mail que está tentando alterar já existe
@@ -53,7 +55,7 @@ export async function updateAgent(app: FastifyInstance) {
 
           if (emailExists) {
             throw new UnauthorizedError(
-              '🚨 Já existe um funcionário com esse e-mail.'
+              '🚨 Não foi possível concluir o cadastro, pois já existe um funcionário vinculado a este e-mail. Por favor, verifique as informações e tente novamente.'
             )
           }
         }
@@ -73,7 +75,9 @@ export async function updateAgent(app: FastifyInstance) {
 
           return reply.status(204).send()
         } catch (err) {
-          throw new UnauthorizedError('🚨 Erro ao atualizar o funcionário.')
+          throw new UnauthorizedError(
+            '🚨 Não foi possível atualizar as informações do funcionário. Por favor, verifique os dados e tente novamente.'
+          )
         }
       }
     )

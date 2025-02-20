@@ -56,7 +56,7 @@ export async function getAll(app: FastifyInstance) {
 
         if (!agents) {
           throw new BadRequestError(
-            '🚨 Ainda não existem funcionários cadastrados.'
+            '🚨 Ainda não há funcionários cadastrados no sistema. Por favor, cadastre um funcionário antes de prosseguir.'
           )
         }
 

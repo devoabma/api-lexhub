@@ -37,7 +37,9 @@ export async function createTypeService(app: FastifyInstance) {
         })
 
         if (serviceType) {
-          throw new BadRequestError('🚨 Tipo de serviço já cadastrado.')
+          throw new BadRequestError(
+            '🚨 O tipo de serviço informado já consta em nossa base de dados. Por favor, insira um nome único para prosseguir com o cadastro.'
+          )
         }
 
         await prisma.serviceTypes.create({

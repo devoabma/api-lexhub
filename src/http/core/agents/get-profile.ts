@@ -46,7 +46,7 @@ export async function getProfile(app: FastifyInstance) {
 
         if (!agent) {
           throw new BadRequestError(
-            'Funcionário não encontrado, verifique os dados enviados.'
+            '🚨 O funcionário solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
           )
         }
 

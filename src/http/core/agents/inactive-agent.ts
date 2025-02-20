@@ -35,7 +35,9 @@ export async function inactiveAgent(app: FastifyInstance) {
         })
 
         if (!agent) {
-          throw new UnauthorizedError('🚨 Funcionário não encontrado.')
+          throw new UnauthorizedError(
+            '🚨 O funcionário solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
+          )
         }
 
         try {
@@ -51,7 +53,9 @@ export async function inactiveAgent(app: FastifyInstance) {
 
           return reply.status(204).send()
         } catch (err) {
-          throw new UnauthorizedError('🚨 Erro ao inativar o funcionário.')
+          throw new UnauthorizedError(
+            '🚨 Ocorreu um erro ao inativar um funcionário. Por favor, tente novamente mais tarde.'
+          )
         }
       }
     )
