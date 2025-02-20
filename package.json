@@ -23,7 +23,7 @@
     "@fastify/jwt": "^9.0.4",
     "@fastify/swagger": "^9.4.2",
     "@fastify/swagger-ui": "^5.2.2",
-    "@prisma/client": "^6.3.1",
+    "@prisma/client": "^6.4.0",
     "@react-email/components": "^0.0.33",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",
@@ -38,9 +38,9 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.13.4",
     "@types/react": "^19.0.10",
-    "prisma": "^6.3.1",
+    "prisma": "^6.4.0",
     "tsup": "^8.3.6",
-    "tsx": "^4.19.2",
+    "tsx": "^4.19.3",
     "typescript": "^5.7.3"
   }
 }

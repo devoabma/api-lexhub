@@ -103,7 +103,7 @@ model ServiceServiceTypes {
   service   Services @relation(fields: [serviceId], references: [id], onDelete: Cascade)
   serviceId String   @map("service_id")
 
-  serviceType   ServiceTypes @relation(fields: [serviceTypeId], references: [id], onDelete: Cascade)
+  serviceType   ServiceTypes @relation(fields: [serviceTypeId], references: [id])
   serviceTypeId String       @map("service_type_id")
 
   @@id([serviceId, serviceTypeId]) // Chave primária composta
