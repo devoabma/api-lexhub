@@ -10,6 +10,8 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(8),
   RESEND_API_KEY: z.string(),
   WEB_URL: z.string().url(),
+  API_PROTHEUS_DATA_URL: z.string().url(),
+  API_PROTHEUS_FIN_URL: z.string().url(),
 })
 
 const _env = envSchema.safeParse(process.env)

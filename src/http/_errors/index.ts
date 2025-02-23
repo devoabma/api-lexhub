@@ -1,3 +1,4 @@
+import { AxiosError } from 'axios'
 import type { FastifyInstance } from 'fastify'
 import { ZodError } from 'zod'
 import { BadRequestError } from './bad-request-error'
@@ -35,6 +36,14 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
   if (error.statusCode === 429) {
     return reply.status(429).send({
       message: 'Limite de requisições excedido. Tente novamente mais tarde.',
+    })
+  }
+
+  // Erro global disparado se não houver advogado
+  if (error instanceof AxiosError) {
+    return reply.status(404).send({
+      message:
+        '🚨 Nenhum registro correspondente para o número da OAB informado. Por favor, verifique os dados e tente novamente.',
     })
   }
 

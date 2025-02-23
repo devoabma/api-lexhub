@@ -25,6 +25,7 @@
     "@fastify/swagger-ui": "^5.2.2",
     "@prisma/client": "^6.4.0",
     "@react-email/components": "^0.0.33",
+    "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
