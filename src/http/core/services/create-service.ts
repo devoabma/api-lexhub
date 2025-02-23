@@ -101,7 +101,7 @@ export async function createService(app: FastifyInstance) {
             status,
             observation,
             agentId,
-            lawyerId: lawyer.id, // Associa o advogado
+            lawyerId: lawyer.id,
           },
         })
 

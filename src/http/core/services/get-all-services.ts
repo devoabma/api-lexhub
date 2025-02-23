@@ -17,8 +17,7 @@ export async function getAllServices(app: FastifyInstance) {
           summary: 'Busca todos os atendimentos cadastrados',
           security: [{ bearerAuth: [] }],
           querystring: z.object({
-            page: z.number().int().positive().default(1),
-            limit: z.number().int().positive().default(5),
+            pageIndex: z.coerce.number(),
             oab: z.string().optional(),
             lawyerName: z.string().optional(),
             agentName: z.string().optional(),
@@ -66,7 +65,7 @@ export async function getAllServices(app: FastifyInstance) {
       async (request, reply) => {
         await request.getCurrentAgentId()
 
-        const { page, limit, oab, lawyerName, agentName, assistance, status } =
+        const { pageIndex, oab, lawyerName, agentName, assistance, status } =
           request.query
 
         try {
@@ -125,8 +124,8 @@ export async function getAllServices(app: FastifyInstance) {
               orderBy: {
                 createdAt: 'desc',
               },
-              skip: (page - 1) * limit,
-              take: limit,
+              skip: (pageIndex - 1) * 5,
+              take: 5,
             }),
             prisma.services.count({
               where: {
