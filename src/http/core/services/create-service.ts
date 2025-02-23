@@ -28,7 +28,7 @@ export async function createService(app: FastifyInstance) {
           security: [{ bearerAuth: [] }],
           body: z.object({
             oab: z.string(),
-            serviceTypeId: z.string().cuid(),
+            serviceTypeId: z.array(z.object({ id: z.string().cuid() })),
             observation: z.string().optional(),
             assistance: z.enum(['PERSONALLY', 'REMOTE']),
             status: z.enum(['OPEN', 'COMPLETED']),
@@ -81,18 +81,24 @@ export async function createService(app: FastifyInstance) {
           })
         }
 
-        // Verifica se o tipo de serviço existe
-        const serviceType = await prisma.serviceTypes.findUnique({
-          where: {
-            id: serviceTypeId,
-          },
-        })
+        // Verifica se todos os tipos de serviço existem
+        const serviceTypes = await Promise.all(
+          serviceTypeId.map(async serviceType => {
+            const type = await prisma.serviceTypes.findUnique({
+              where: {
+                id: serviceType.id,
+              },
+            })
 
-        if (!serviceType) {
-          throw new UnauthorizedError(
-            '🚨 Tipo de serviço inválido. Verifique as informações e tente novamente.'
-          )
-        }
+            if (!type) {
+              throw new UnauthorizedError(
+                `🚨 Tipo de serviço com ID ${serviceType.id} não encontrado. Verifique as informações e tente novamente.`
+              )
+            }
+
+            return type
+          })
+        )
 
         // Cria o atendimento (Service)
         const service = await prisma.services.create({
@@ -105,13 +111,17 @@ export async function createService(app: FastifyInstance) {
           },
         })
 
-        // Associa o Service ao ServiceType na tabela ServiceServiceTypes
-        await prisma.serviceServiceTypes.create({
-          data: {
-            serviceId: service.id,
-            serviceTypeId: serviceType.id,
-          },
-        })
+        // Associa o Service aos ServiceTypes na tabela ServiceServiceTypes
+        await Promise.all(
+          serviceTypes.map(async serviceType => {
+            await prisma.serviceServiceTypes.create({
+              data: {
+                serviceId: service.id,
+                serviceTypeId: serviceType.id,
+              },
+            })
+          })
+        )
 
         return reply.status(201).send()
       }

@@ -17,7 +17,7 @@ export async function getAllServices(app: FastifyInstance) {
           summary: 'Busca todos os atendimentos cadastrados',
           security: [{ bearerAuth: [] }],
           querystring: z.object({
-            pageIndex: z.coerce.number(),
+            pageIndex: z.coerce.number().default(1),
             oab: z.string().optional(),
             lawyerName: z.string().optional(),
             agentName: z.string().optional(),
