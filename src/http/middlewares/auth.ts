@@ -19,27 +19,28 @@ export const auth = fastifyPlugin(async (app: FastifyInstance) => {
     }
 
     request.checkIfAgentIsAdmin = async () => {
-      try {
-        const { sub } = await request.jwtVerify<{ sub: string }>()
-
-        const agent = await prisma.agent.findUnique({
-          where: {
-            id: sub,
-          },
-          select: {
-            role: true,
-          },
-        })
-
-        // Se o agente não for encontrado ou não for um administrador, lança um erro
-        if (!agent || agent.role !== 'ADMIN') {
-          throw new UnauthorizedError(
-            '🚨 Você não possui permissão para realizar essa operação.'
-          )
-        }
-      } catch {
+      // Verifica o token primeiro
+      const { sub } = await request.jwtVerify<{ sub: string }>().catch(() => {
         throw new UnauthorizedError(
-          '🚨 Token inválido ou expirado. Faça login novamente.'
+          '🚨 Token inválido ou expirado. Verifique as informações e tente novamente.'
+        )
+      })
+
+      // Busca o agente no banco de dados
+      const agent = await prisma.agent.findUnique({
+        where: { id: sub },
+        select: { role: true },
+      })
+
+      if (!agent) {
+        throw new UnauthorizedError(
+          '🚨 Funcionário não encontrado. Verifique os dados e tente novamente.'
+        )
+      }
+
+      if (agent.role === 'MEMBER') {
+        throw new UnauthorizedError(
+          '🚨 Permissão negada. Você precisa ser um administrador para realizar esta ação.'
         )
       }
     }
