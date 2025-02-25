@@ -19,11 +19,11 @@
   "license": "ISC",
   "dependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@fastify/cors": "^10.0.2",
+    "@fastify/cors": "^10.1.0",
     "@fastify/jwt": "^9.0.4",
     "@fastify/swagger": "^9.4.2",
     "@fastify/swagger-ui": "^5.2.2",
-    "@prisma/client": "^6.4.0",
+    "@prisma/client": "^6.4.1",
     "@react-email/components": "^0.0.33",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
@@ -37,11 +37,18 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
-    "@types/node": "^22.13.4",
+    "@types/node": "^22.13.5",
     "@types/react": "^19.0.10",
-    "prisma": "^6.4.0",
+    "prisma": "^6.4.1",
     "tsup": "^8.3.6",
     "tsx": "^4.19.3",
     "typescript": "^5.7.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma"
+    ]
   }
 }
