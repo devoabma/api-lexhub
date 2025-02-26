@@ -71,7 +71,7 @@ model Services {
   id          String          @id @default(uuid())
   assistance  AssistanceTypes
   observation String?
-  status      ServiceStatus
+  status      ServiceStatus   @default(OPEN)
   createdAt   DateTime        @default(now()) @map("created_at")
   finishedAt  DateTime?       @map("finished_at")
 

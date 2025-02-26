@@ -31,7 +31,7 @@ export async function createService(app: FastifyInstance) {
             serviceTypeId: z.array(z.object({ id: z.string().cuid() })),
             observation: z.string().optional(),
             assistance: z.enum(['PERSONALLY', 'REMOTE']),
-            status: z.enum(['OPEN', 'COMPLETED']),
+            status: z.enum(['OPEN', 'COMPLETED']).default('OPEN'),
           }),
           response: {
             201: z.null(),
@@ -41,8 +41,7 @@ export async function createService(app: FastifyInstance) {
       async (request, reply) => {
         const agentId = await request.getCurrentAgentId()
 
-        const { oab, serviceTypeId, observation, assistance, status } =
-          request.body
+        const { oab, serviceTypeId, observation, assistance } = request.body
 
         // Busca na API do Protheus se o advogado está adimplente
         const { data } = await API_PROTHEUS_FIN_URL(`/${oab}`)
@@ -92,7 +91,7 @@ export async function createService(app: FastifyInstance) {
 
             if (!type) {
               throw new UnauthorizedError(
-                `🚨 Tipo de serviço com ID ${serviceType.id} não encontrado. Verifique as informações e tente novamente.`
+                '🚨 Tipo de serviço não encontrado. Verifique as informações e tente novamente.'
               )
             }
 
@@ -104,7 +103,6 @@ export async function createService(app: FastifyInstance) {
         const service = await prisma.services.create({
           data: {
             assistance,
-            status,
             observation,
             agentId,
             lawyerId: lawyer.id,
