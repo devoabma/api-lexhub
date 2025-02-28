@@ -41,11 +41,17 @@ export async function getAllQuantityServicesInMonth(app: FastifyInstance) {
         const servicesInMonth = await prisma.services.count({
           where: {
             createdAt: {
-              gte: startOfMonth,
-              lte: endOfMonth,
+              gte: startOfMonth, // maior ou igual ao primeiro dia do mês
+              lte: endOfMonth, // menor ou igual ao último dia do mês
             },
           },
         })
+
+        if (!servicesInMonth) {
+          throw new BadRequestError(
+            '🚨 Não existem atendimentos cadastrados ainda. Tente novamente mais tarde.'
+          )
+        }
 
         // Lógica para o mês anterior
         const startOfPreviousMonth = now
@@ -65,12 +71,6 @@ export async function getAllQuantityServicesInMonth(app: FastifyInstance) {
             },
           },
         })
-
-        if (!servicesInMonth) {
-          throw new BadRequestError(
-            '🚨 Não existem atendimentos cadastrados ainda. Tente novamente mais tarde.'
-          )
-        }
 
         return reply.status(200).send({
           totalCurrentMonth: servicesInMonth,
