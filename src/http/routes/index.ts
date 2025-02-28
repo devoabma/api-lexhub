@@ -16,6 +16,8 @@ import { getAllTypesServices } from 'http/core/services/get-all-types-services'
 import { updateTypeService } from 'http/core/services/update-type-service'
 import { createAccountService } from '../core/agents/create-account'
 import { cancelService } from 'http/core/services/cancel-service'
+import { getAllQuantityServices } from 'http/core/services/get-all-quantity-services'
+import { getAllQuantityServicesInMonth } from 'http/core/services/get-all-quantity-services-in-month'
 
 export async function routes(app: FastifyInstance) {
   // Rotas de agents
@@ -39,4 +41,6 @@ export async function routes(app: FastifyInstance) {
   app.register(getAllServices)
   app.register(finishedService)
   app.register(cancelService)
+  app.register(getAllQuantityServices)
+  app.register(getAllQuantityServicesInMonth)
 }

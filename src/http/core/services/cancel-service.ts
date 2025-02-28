@@ -1,6 +1,5 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { BadRequestError } from 'http/_errors/bad-request-error'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
@@ -54,7 +53,7 @@ export async function cancelService(app: FastifyInstance) {
           return reply.status(204).send()
         } catch (err) {
           throw new UnauthorizedError(
-            '🚨 Ocorreu para cancelar o atendimento. Por favor, verifique os dados informados e tente novamente.'
+            '🚨 Ocorreu um erro para cancelar o atendimento. Por favor, verifique os dados informados e tente novamente.'
           )
         }
       }
