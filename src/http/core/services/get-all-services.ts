@@ -124,8 +124,8 @@ export async function getAllServices(app: FastifyInstance) {
               orderBy: {
                 createdAt: 'desc',
               },
-              skip: (pageIndex - 1) * 5,
-              take: 5,
+              skip: (pageIndex - 1) * 10, // Pular os primeiros 10 atendimentos
+              take: 10, // Recuperar apenas 10 atendimentos
             }),
             prisma.services.count({
               where: {
