@@ -1,7 +1,6 @@
 import dayjs from 'dayjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { BadRequestError } from 'http/_errors/bad-request-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
 import z from 'zod'
@@ -46,12 +45,6 @@ export async function getAllQuantityServicesInMonth(app: FastifyInstance) {
             },
           },
         })
-
-        if (!servicesInMonth) {
-          throw new BadRequestError(
-            '🚨 Não existem atendimentos cadastrados ainda. Tente novamente mais tarde.'
-          )
-        }
 
         // Lógica para o mês anterior
         const startOfPreviousMonth = now
