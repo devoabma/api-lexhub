@@ -1,3 +1,4 @@
+import { fastifyCookie } from '@fastify/cookie'
 import { fastifyCors } from '@fastify/cors'
 import { fastifyJwt } from '@fastify/jwt'
 import { fastifySwagger } from '@fastify/swagger'
@@ -17,6 +18,9 @@ export const app = fastify().withTypeProvider<ZodTypeProvider>()
 
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
+
+// Configura o tratamento de erros globais da API
+app.setErrorHandler(errorHandler)
 
 // Configura o swagger para documentação da API
 app.register(fastifySwagger, {
@@ -46,13 +50,16 @@ app.register(fastifySwaggerUi, {
   routePrefix: '/docs', // rota para acessar a documentação
 })
 
+app.register(fastifyCookie)
+
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
+  cookie: {
+    cookieName: '@lexhub-auth',
+    signed: false,
+  },
 })
 
 app.register(fastifyCors)
 
 app.register(routes)
-
-// Configura o tratamento de erros globais da API
-app.setErrorHandler(errorHandler)

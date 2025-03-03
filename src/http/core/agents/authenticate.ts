@@ -61,6 +61,7 @@ export async function authenticate(app: FastifyInstance) {
         {
           // Envia o id do usuário para o token
           sub: userFromEmail.id,
+          role: userFromEmail.role,
         },
         {
           sign: {
@@ -69,9 +70,17 @@ export async function authenticate(app: FastifyInstance) {
         }
       )
 
-      return reply.status(201).send({
-        token,
-      })
+      return reply
+        .setCookie('@lexhub-auth', token, {
+          path: '/',
+          httpOnly: true,
+          sameSite: true,
+          maxAge: 1000 * 60 * 60 * 24, // 1 day
+        })
+        .status(201)
+        .send({
+          token,
+        })
     }
   )
 }
