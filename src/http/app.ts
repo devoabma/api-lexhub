@@ -1,6 +1,7 @@
 import { fastifyCookie } from '@fastify/cookie'
 import { fastifyCors } from '@fastify/cors'
 import { fastifyJwt } from '@fastify/jwt'
+import { fastifyRateLimit } from '@fastify/rate-limit'
 import { fastifySwagger } from '@fastify/swagger'
 import { fastifySwaggerUi } from '@fastify/swagger-ui'
 import { fastify } from 'fastify'
@@ -60,6 +61,14 @@ app.register(fastifyJwt, {
   },
 })
 
-app.register(fastifyCors)
+app.register(fastifyCors, {
+  origin: env.WEB_URL, // domínio permitido
+  credentials: true, // permite cookies
+})
+
+app.register(fastifyRateLimit, {
+  max: 100, // quantidade máxima de requisicoes por IP
+  timeWindow: '5 minute', // tempo de bloqueio
+})
 
 app.register(routes)
