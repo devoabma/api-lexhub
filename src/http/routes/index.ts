@@ -8,17 +8,18 @@ import { inactiveAgent } from 'http/core/agents/inactive-agent'
 import { requestPasswordRecover } from 'http/core/agents/request-password-recover'
 import { resetPassword } from 'http/core/agents/reset-password'
 import { updateAgent } from 'http/core/agents/update-agent'
+import { cancelService } from 'http/core/services/cancel-service'
 import { createService } from 'http/core/services/create-service'
 import { createTypeService } from 'http/core/services/create-type-service'
 import { finishedService } from 'http/core/services/finished-service'
+import { getAllQuantityServices } from 'http/core/services/get-all-quantity-services'
+import { getAllQuantityServicesByAgent } from 'http/core/services/get-all-quantity-services-by-agent'
+import { getAllQuantityServicesInMonth } from 'http/core/services/get-all-quantity-services-in-month'
+import { getAllQuantityServicesInYear } from 'http/core/services/get-all-quantity-services-in-year'
 import { getAllServices } from 'http/core/services/get-all-services'
 import { getAllTypesServices } from 'http/core/services/get-all-types-services'
 import { updateTypeService } from 'http/core/services/update-type-service'
 import { createAccountService } from '../core/agents/create-account'
-import { cancelService } from 'http/core/services/cancel-service'
-import { getAllQuantityServices } from 'http/core/services/get-all-quantity-services'
-import { getAllQuantityServicesInMonth } from 'http/core/services/get-all-quantity-services-in-month'
-import { getAllQuantityServicesInYear } from 'http/core/services/get-all-quantity-services-in-year'
 
 export async function routes(app: FastifyInstance) {
   // Rotas de agents
@@ -45,4 +46,5 @@ export async function routes(app: FastifyInstance) {
   app.register(getAllQuantityServices)
   app.register(getAllQuantityServicesInMonth)
   app.register(getAllQuantityServicesInYear)
+  app.register(getAllQuantityServicesByAgent)
 }
