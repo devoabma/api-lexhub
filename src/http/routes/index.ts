@@ -5,6 +5,7 @@ import { authenticate } from 'http/core/agents/authenticate'
 import { getAll } from 'http/core/agents/get-all'
 import { getProfile } from 'http/core/agents/get-profile'
 import { inactiveAgent } from 'http/core/agents/inactive-agent'
+import { logoutAgent } from 'http/core/agents/logout-agent'
 import { requestPasswordRecover } from 'http/core/agents/request-password-recover'
 import { resetPassword } from 'http/core/agents/reset-password'
 import { updateAgent } from 'http/core/agents/update-agent'
@@ -32,6 +33,7 @@ export async function routes(app: FastifyInstance) {
   app.register(updateAgent)
   app.register(inactiveAgent)
   app.register(activeAgent)
+  app.register(logoutAgent)
 
   // Rotas de services types
   app.register(createTypeService)
