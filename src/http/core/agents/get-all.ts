@@ -36,10 +36,6 @@ export async function getAll(app: FastifyInstance) {
         await request.checkIfAgentIsAdmin()
 
         const agents = await prisma.agent.findMany({
-          // Lista somente os funcionários com o papel de "MEMBER"
-          where: {
-            role: 'MEMBER',
-          },
           select: {
             id: true,
             name: true,
