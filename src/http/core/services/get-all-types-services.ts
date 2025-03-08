@@ -47,14 +47,14 @@ export async function getAllTypesServices(app: FastifyInstance) {
 
           if (!servicesTypes) {
             throw new BadRequestError(
-              '🚨 Atualmente, não há tipos de serviços registrados. Para prosseguir, cadastre um novo tipo de serviço.'
+              ' Atualmente, não há tipos de serviços registrados. Para prosseguir, cadastre um novo tipo de serviço.'
             )
           }
 
           return reply.status(200).send({ servicesTypes })
         } catch (err) {
           throw new BadRequestError(
-            '🚨 Ocorreu um erro ao tentar recuperar os tipos de serviços. Por favor, tente novamente mais tarde. Caso o problema persista, entre em contato com o suporte técnico para assistência.'
+            ' Ocorreu um erro ao tentar recuperar os tipos de serviços. Por favor, tente novamente mais tarde. Caso o problema persista, entre em contato com o suporte técnico para assistência.'
           )
         }
       }

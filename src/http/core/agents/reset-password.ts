@@ -34,7 +34,7 @@ export async function resetPassword(app: FastifyInstance) {
 
         if (!tokenFromCode) {
           throw new UnauthorizedError(
-            '🚨 O código de redefinição de senha informado é inválido. Por favor, verifique e tente novamente.'
+            ' O código de redefinição de senha informado é inválido. Por favor, verifique e tente novamente.'
           )
         }
 
@@ -47,7 +47,7 @@ export async function resetPassword(app: FastifyInstance) {
 
         if (!agent) {
           throw new UnauthorizedError(
-            '🚨 Nenhum funcionário correspondente foi encontrado. Por favor, verifique as informações e tente novamente.'
+            ' Nenhum funcionário correspondente foi encontrado. Por favor, verifique as informações e tente novamente.'
           )
         }
 
@@ -56,7 +56,7 @@ export async function resetPassword(app: FastifyInstance) {
 
         if (isSamePassword) {
           throw new UnauthorizedError(
-            '🚨 A nova senha deve ser diferente da senha atual. Por favor, escolha uma senha diferente e tente novamente.'
+            ' A nova senha deve ser diferente da senha atual. Por favor, escolha uma senha diferente e tente novamente.'
           )
         }
 
@@ -75,7 +75,7 @@ export async function resetPassword(app: FastifyInstance) {
         return reply.status(204).send()
       } catch (err) {
         throw new UnauthorizedError(
-          '🚨 Ocorreu um erro ao redefinir a senha. Por favor, tente novamente mais tarde.'
+          ' Ocorreu um erro ao redefinir a senha. Por favor, tente novamente mais tarde.'
         )
       }
     }

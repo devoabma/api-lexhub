@@ -9,7 +9,7 @@ type FastifyErrorHandler = FastifyInstance['errorHandler']
 export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
   if (error.validation) {
     return reply.status(400).send({
-      message: '🚨 Houve um erro na validação, verifique os dados enviados.',
+      message: ' Houve um erro na validação, verifique os dados enviados.',
     })
   }
 
@@ -43,13 +43,13 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
   if (error instanceof AxiosError) {
     return reply.status(404).send({
       message:
-        '🚨 Nenhum registro correspondente para o número da OAB informado. Por favor, verifique os dados e tente novamente.',
+        ' Nenhum registro correspondente para o número da OAB informado. Por favor, verifique os dados e tente novamente.',
     })
   }
 
   console.error(error)
   // Enviar erro para alguma plataforma de observabilidade
   return reply.status(500).send({
-    message: '🚨 Erro interno do servidor. Tente novamente mais tarde.',
+    message: ' Erro interno do servidor. Tente novamente mais tarde.',
   })
 }

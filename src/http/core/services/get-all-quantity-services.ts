@@ -31,14 +31,14 @@ export async function getAllQuantityServices(app: FastifyInstance) {
 
           if (!services) {
             throw new BadRequestError(
-              '🚨 Não existem atendimentos cadastrados ainda. Tente novamente mais tarde.'
+              ' Não existem atendimentos cadastrados ainda. Tente novamente mais tarde.'
             )
           }
 
           return reply.status(200).send({ total: services })
         } catch (error) {
           throw new BadRequestError(
-            '🚨 Ocorreu um erro ao buscar os atendimentos cadastrados'
+            ' Ocorreu um erro ao buscar os atendimentos cadastrados'
           )
         }
       }

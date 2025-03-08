@@ -48,7 +48,7 @@ export async function createService(app: FastifyInstance) {
 
         if (!data) {
           throw new UnauthorizedError(
-            '🚨 Não foi possível prosseguir com o atendimento no momento. Por favor, entre em contato com o setor financeiro para mais informações.'
+            ' Não foi possível prosseguir com o atendimento no momento. Por favor, entre em contato com o setor financeiro para mais informações.'
           )
         }
 
@@ -91,7 +91,7 @@ export async function createService(app: FastifyInstance) {
 
             if (!type) {
               throw new UnauthorizedError(
-                '🚨 Tipo de serviço não encontrado. Verifique as informações e tente novamente.'
+                ' Tipo de serviço não encontrado. Verifique as informações e tente novamente.'
               )
             }
 

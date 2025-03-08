@@ -36,7 +36,7 @@ export async function activeAgent(app: FastifyInstance) {
 
         if (!agent) {
           throw new UnauthorizedError(
-            '🚨 O funcionário solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
+            ' O funcionário solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
           )
         }
 
@@ -54,7 +54,7 @@ export async function activeAgent(app: FastifyInstance) {
           return reply.status(204).send()
         } catch (err) {
           throw new UnauthorizedError(
-            '🚨 Ocorreu um erro ao ativar um funcionário. Por favor, tente novamente mais tarde.'
+            ' Ocorreu um erro ao ativar um funcionário. Por favor, tente novamente mais tarde.'
           )
         }
       }

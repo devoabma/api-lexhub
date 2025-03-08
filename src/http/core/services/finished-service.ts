@@ -35,13 +35,13 @@ export async function finishedService(app: FastifyInstance) {
 
         if (!service) {
           throw new UnauthorizedError(
-            '🚨 O atendimento solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
+            ' O atendimento solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
           )
         }
 
         if (service.status === 'COMPLETED') {
           throw new UnauthorizedError(
-            '🚨 O atendimento solicitado já foi finalizado. Por favor, verifique os dados informados e tente novamente.'
+            ' O atendimento solicitado já foi finalizado. Por favor, verifique os dados informados e tente novamente.'
           )
         }
 
@@ -59,7 +59,7 @@ export async function finishedService(app: FastifyInstance) {
           return reply.status(204).send()
         } catch (err) {
           throw new UnauthorizedError(
-            '🚨 Ocorreu um erro ao finalizar o atendimento. Por favor, tente novamente mais tarde.'
+            ' Ocorreu um erro ao finalizar o atendimento. Por favor, tente novamente mais tarde.'
           )
         }
       }

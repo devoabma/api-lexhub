@@ -35,13 +35,13 @@ export async function authenticate(app: FastifyInstance) {
       // Verifica se o usuário foi desativado pelo administrador
       if (userFromEmail && userFromEmail.inactive !== null) {
         throw new BadRequestError(
-          '🚨 O funcionário está inativo. Por favor, entre em contato com o administrador do sistema para mais informações.'
+          ' O funcionário está inativo. Por favor, entre em contato com o administrador do sistema para mais informações.'
         )
       }
 
       if (!userFromEmail) {
         throw new BadRequestError(
-          '🚨 As credenciais fornecidas são inválidas. Por favor, verifique suas informações e tente novamente.'
+          ' As credenciais fornecidas são inválidas. Por favor, verifique suas informações e tente novamente.'
         )
       }
 
@@ -52,7 +52,7 @@ export async function authenticate(app: FastifyInstance) {
 
       if (!isPasswordValid) {
         throw new BadRequestError(
-          '🚨 As credenciais fornecidas são inválidas. Por favor, verifique suas informações e tente novamente.'
+          ' As credenciais fornecidas são inválidas. Por favor, verifique suas informações e tente novamente.'
         )
       }
 

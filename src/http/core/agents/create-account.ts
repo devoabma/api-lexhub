@@ -44,7 +44,7 @@ export async function createAccountService(app: FastifyInstance) {
 
         if (userWithSameEmail) {
           throw new BadRequestError(
-            '🚨 Já existe um funcionário cadastrado com esse e-mail.'
+            'E-mail já cadastrado para outro funcionário.'
           )
         }
 
@@ -77,7 +77,7 @@ export async function createAccountService(app: FastifyInstance) {
           return reply.status(201).send()
         } catch (err) {
           throw new BadRequestError(
-            '🚨 Ocorreu um erro ao tentar criar o funcionário. Por favor, tente novamente mais tarde.'
+            'Erro ao criar funcionário. Por favor, tente novamente.'
           )
         }
       }
