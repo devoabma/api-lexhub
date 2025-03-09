@@ -57,6 +57,13 @@ export async function requestPasswordRecover(app: FastifyInstance) {
         }),
       })
 
+      // Excluir o token após 2 minutos (120000ms)
+      setTimeout(async () => {
+        await prisma.token.delete({
+          where: { code },
+        })
+      }, 120000)
+
       // Somente em ambiente de desenvolvimento mostra no console
       if (env.NODE_ENV === 'DEVELOPMENT') {
         console.log(

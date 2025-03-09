@@ -24,60 +24,54 @@ export async function resetPassword(app: FastifyInstance) {
     async (request, reply) => {
       const { code, password } = request.body
 
-      try {
-        // Verifica se o código de redefinição de senha é válido
-        const tokenFromCode = await prisma.token.findUnique({
-          where: {
-            code,
-          },
-        })
+      // Verifica se o código de redefinição de senha é válido
+      const tokenFromCode = await prisma.token.findUnique({
+        where: {
+          code,
+        },
+      })
 
-        if (!tokenFromCode) {
-          throw new UnauthorizedError(
-            'Código de redefinição de senha inválido. Verifique e tente novamente.'
-          )
-        }
-
-        // Busca o funcionário associado ao token
-        const agent = await prisma.agent.findUnique({
-          where: {
-            id: tokenFromCode.agentId,
-          },
-        })
-
-        if (!agent) {
-          throw new UnauthorizedError(
-            'Nenhum funcionário encontrado. Verifique as informações e tente novamente.'
-          )
-        }
-
-        // Verifica se a nova senha é igual à senha atual
-        const isSamePassword = await compare(password, agent.passwordHash)
-
-        if (isSamePassword) {
-          throw new UnauthorizedError(
-            'A nova senha deve ser diferente da atual. Escolha outra senha e tente novamente.'
-          )
-        }
-
-        const passwordHash = await hash(password, 8)
-
-        // Atualiza a senha do agente com o novo hash de senha
-        await prisma.agent.update({
-          where: {
-            id: tokenFromCode.agentId,
-          },
-          data: {
-            passwordHash,
-          },
-        })
-
-        return reply.status(204).send()
-      } catch (err) {
+      if (!tokenFromCode || tokenFromCode.code !== code) {
         throw new UnauthorizedError(
-          'Erro ao redefinir a senha. Tente novamente mais tarde.'
+          'Código de redefinição de senha inválido. Verifique e tente novamente.'
         )
       }
+
+      // Busca o funcionário associado ao token
+      const agent = await prisma.agent.findUnique({
+        where: {
+          id: tokenFromCode.agentId,
+        },
+      })
+
+      if (!agent) {
+        throw new UnauthorizedError(
+          'Nenhum funcionário encontrado. Verifique as informações e tente novamente.'
+        )
+      }
+
+      // Verifica se a nova senha é igual à senha atual
+      const isSamePassword = await compare(password, agent.passwordHash)
+
+      if (isSamePassword) {
+        throw new UnauthorizedError(
+          'A nova senha deve ser diferente da atual. Escolha outra senha e tente novamente.'
+        )
+      }
+
+      const passwordHash = await hash(password, 8)
+
+      // Atualiza a senha do agente com o novo hash de senha
+      await prisma.agent.update({
+        where: {
+          id: tokenFromCode.agentId,
+        },
+        data: {
+          passwordHash,
+        },
+      })
+
+      return reply.status(204).send()
     }
   )
 }
