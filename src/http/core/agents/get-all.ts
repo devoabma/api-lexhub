@@ -16,6 +16,11 @@ export async function getAll(app: FastifyInstance) {
           tags: ['agents'],
           summary: 'Busca todos os funcionários cadastrados',
           security: [{ bearerAuth: [] }],
+          querystring: z.object({
+            pageIndex: z.coerce.number().default(1),
+            name: z.string().optional(),
+            role: z.enum(['ADMIN', 'MEMBER']).optional(),
+          }),
           response: {
             200: z.object({
               agents: z.array(
@@ -27,6 +32,7 @@ export async function getAll(app: FastifyInstance) {
                   inactive: z.date().nullable(),
                 })
               ),
+              total: z.number(),
             }),
           },
         },
@@ -35,30 +41,81 @@ export async function getAll(app: FastifyInstance) {
         // Somente administradores podem listar todos os funcionários
         await request.checkIfAgentIsAdmin()
 
-        const agents = await prisma.agent.findMany({
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-            inactive: true,
-          },
-          orderBy: [
-            {
-              createdAt: 'desc', // Mostra os funcionários mais recentes primeiro
-            },
-          ],
-        })
+        const { pageIndex, name, role } = request.query
 
-        if (!agents) {
+        try {
+          const [agents, total] = await Promise.all([
+            prisma.agent.findMany({
+              where: {
+                name: name
+                  ? { contains: name, mode: 'insensitive' }
+                  : undefined,
+                role: role ? role : undefined,
+              },
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                role: true,
+                inactive: true,
+              },
+              orderBy: {
+                createdAt: 'desc',
+              },
+              skip: (pageIndex - 1) * 2,
+              take: 2,
+            }),
+            prisma.agent.count({
+              where: {
+                name: name
+                  ? { contains: name, mode: 'insensitive' }
+                  : undefined,
+                role: role ? role : undefined,
+              },
+            }),
+          ])
+
+          if (!agents) {
+            throw new BadRequestError(
+              'Nenhum funcionário cadastrado. Cadastre um para continuar.'
+            )
+          }
+
+          return reply.status(200).send({
+            agents,
+            total,
+          })
+        } catch (err) {
           throw new BadRequestError(
-            ' Ainda não há funcionários cadastrados no sistema. Por favor, cadastre um funcionário antes de prosseguir.'
+            'Não foi possível recuperar os atendimentos. Tente novamente mais tarde.'
           )
         }
 
-        return reply.status(200).send({
-          agents,
-        })
+        // const agents = await prisma.agent.findMany({
+        //   select: {
+        //     id: true,
+        //     name: true,
+        //     email: true,
+        //     role: true,
+        //     inactive: true,
+        //   },
+        //   orderBy: [
+        //     {
+        //       createdAt: 'desc', // Mostra os funcionários mais recentes primeiro
+        //     },
+        //   ],
+        // })
+
+        // if (!agents) {
+        //   throw new BadRequestError(
+        //     ' Ainda não há funcionários cadastrados no sistema. Por favor, cadastre um funcionário antes de prosseguir.'
+        //   )
+        // }
+
+        // return reply.status(200).send({
+        //   agents,
+        //   total: agents.length,
+        // })
       }
     )
 }
