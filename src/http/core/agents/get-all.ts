@@ -62,8 +62,8 @@ export async function getAll(app: FastifyInstance) {
               orderBy: {
                 createdAt: 'desc',
               },
-              skip: (pageIndex - 1) * 2,
-              take: 2,
+              skip: (pageIndex - 1) * 10,
+              take: 10,
             }),
             prisma.agent.count({
               where: {
