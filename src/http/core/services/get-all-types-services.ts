@@ -16,6 +16,11 @@ export async function getAllTypesServices(app: FastifyInstance) {
           tags: ['servicesTypes'],
           summary: 'Busca todos os tipos de serviços cadastrados',
           security: [{ bearerAuth: [] }],
+          querystring: z.object({
+            pageIndex: z.coerce.number().default(1),
+            id: z.string().cuid().optional(),
+            name: z.string().optional(),
+          }),
           response: {
             200: z.object({
               servicesTypes: z.array(
@@ -24,6 +29,7 @@ export async function getAllTypesServices(app: FastifyInstance) {
                   name: z.string(),
                 })
               ),
+              total: z.number(),
             }),
           },
         },
@@ -32,29 +38,49 @@ export async function getAllTypesServices(app: FastifyInstance) {
         // Somente administradores podem listar todos os funcionários
         await request.checkIfAgentIsAdmin()
 
+        const { pageIndex, id, name } = request.query
+
         try {
-          const servicesTypes = await prisma.serviceTypes.findMany({
-            select: {
-              id: true,
-              name: true,
-            },
-            orderBy: [
-              {
-                createdAt: 'desc', // Mostra os tipos de serviços mais recentes primeiro
+          const [servicesTypes, total] = await Promise.all([
+            prisma.serviceTypes.findMany({
+              where: {
+                id: id && { equals: id },
+                name: name
+                  ? { contains: name, mode: 'insensitive' }
+                  : undefined,
               },
-            ],
-          })
+              select: {
+                id: true,
+                name: true,
+              },
+              orderBy: [
+                {
+                  createdAt: 'desc', // Mostra os tipos de serviços mais recentes primeiro
+                },
+              ],
+              skip: (pageIndex - 1) * 10,
+              take: 10,
+            }),
+            prisma.serviceTypes.count({
+              where: {
+                id: id && { equals: id },
+                name: name
+                  ? { contains: name, mode: 'insensitive' }
+                  : undefined,
+              },
+            }),
+          ])
 
           if (!servicesTypes) {
             throw new BadRequestError(
-              ' Atualmente, não há tipos de serviços registrados. Para prosseguir, cadastre um novo tipo de serviço.'
+              'Nenhum tipo de serviço cadastrado. Cadastre um para continuar.'
             )
           }
 
-          return reply.status(200).send({ servicesTypes })
+          return reply.status(200).send({ servicesTypes, total })
         } catch (err) {
           throw new BadRequestError(
-            ' Ocorreu um erro ao tentar recuperar os tipos de serviços. Por favor, tente novamente mais tarde. Caso o problema persista, entre em contato com o suporte técnico para assistência.'
+            'Não foi possível recuperar os tipos de serviços. Tente novamente mais tarde.'
           )
         }
       }
