@@ -2,32 +2,25 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { auth } from 'http/middlewares/auth'
-import { API_PROTHEUS_DATA_URL, API_PROTHEUS_FIN_URL } from 'lib/axios'
 import { prisma } from 'lib/prisma'
-import { z } from 'zod'
+import z from 'zod'
 
-interface LawyersProps {
-  lawyer: {
-    nome: string
-    cpf: string
-    registro: string
-    email: string
-  }
-}
-
-export async function createService(app: FastifyInstance) {
+export async function createServiceExternal(app: FastifyInstance) {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
     .post(
-      '/services',
+      '/services/external',
       {
         schema: {
-          tags: ['services'],
-          summary: 'Criação de um novo atendimento',
+          tags: ['servicesExternal'],
+          summary: 'Criação de um novo serviço externo',
           security: [{ bearerAuth: [] }],
           body: z.object({
             oab: z.string(),
+            name: z.string(),
+            cpf: z.string(),
+            email: z.string().email(),
             serviceTypeId: z.array(z.object({ id: z.string().cuid() })),
             observation: z.string().optional(),
             assistance: z.enum(['PERSONALLY', 'REMOTE']),
@@ -41,16 +34,15 @@ export async function createService(app: FastifyInstance) {
       async (request, reply) => {
         const agentId = await request.getCurrentAgentId()
 
-        const { oab, serviceTypeId, observation, assistance } = request.body
-
-        // Busca na API do Protheus se o advogado está adimplente
-        const { data } = await API_PROTHEUS_FIN_URL(`/${oab}`)
-
-        if (!data) {
-          throw new UnauthorizedError(
-            'Não foi possível prosseguir com o atendimento no momento. Por favor, entre em contato com o setor financeiro para mais informações.'
-          )
-        }
+        const {
+          oab,
+          name,
+          cpf,
+          email,
+          serviceTypeId,
+          observation,
+          assistance,
+        } = request.body
 
         // Verifica se o advogado já está cadastrado no banco de dados
         let lawyer = await prisma.lawyer.findUnique({
@@ -59,28 +51,17 @@ export async function createService(app: FastifyInstance) {
           },
         })
 
-        // Cria o advogado no banco de dados se ele ainda não estiver cadastrado
         if (!lawyer) {
-          const {
-            data: { lawyer: lawyerData },
-          } = await API_PROTHEUS_DATA_URL<LawyersProps>('/', {
-            params: {
-              idOrg: 10,
-              param: oab,
-            },
-          })
-
           lawyer = await prisma.lawyer.create({
             data: {
-              name: lawyerData.nome,
-              cpf: lawyerData.cpf,
-              oab: lawyerData.registro,
-              email: lawyerData.email,
+              oab,
+              name,
+              cpf,
+              email,
             },
           })
         }
 
-        // Verifica se todos os tipos de serviço existem
         const serviceTypes = await Promise.all(
           serviceTypeId.map(async serviceType => {
             const type = await prisma.serviceTypes.findUnique({
@@ -91,7 +72,7 @@ export async function createService(app: FastifyInstance) {
 
             if (!type) {
               throw new UnauthorizedError(
-                ' Tipo de serviço não encontrado. Verifique as informações e tente novamente.'
+                'Tipo de serviço não encontrado. Verifique os dados e tente novamente.'
               )
             }
 
