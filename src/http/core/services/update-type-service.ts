@@ -41,13 +41,13 @@ export async function updateTypeService(app: FastifyInstance) {
 
         if (!serviceType) {
           throw new UnauthorizedError(
-            ' O tipo de serviço solicitado não foi localizado em nossa base de dados. Por favor, verifique as informações e tente novamente.'
+            'Serviço não encontrado. Verifique as informações e tente novamente.'
           )
         }
 
         if (name === serviceType.name) {
           throw new BadRequestError(
-            ' O nome inserido é idêntico ao nome já registrado para este tipo de serviço. Por favor, revise e insira uma nova opção.'
+            'O nome inserido já está registrado para este serviço. Revise e insira uma nova opção.'
           )
         }
 
@@ -60,7 +60,7 @@ export async function updateTypeService(app: FastifyInstance) {
 
           if (serviceTypeExists) {
             throw new UnauthorizedError(
-              ' O tipo de serviço informado já consta em nossa base de dados. Por favor, insira um nome único para prosseguir com o cadastro.'
+              'O tipo de serviço informado já existe. Insira um nome único para prosseguir.'
             )
           }
         }
@@ -79,7 +79,7 @@ export async function updateTypeService(app: FastifyInstance) {
           return reply.status(204).send()
         } catch (err) {
           throw new UnauthorizedError(
-            ' Ocorreu um erro durante a atualização do tipo de serviço. Por favor, verifique os dados informados e tente novamente. Caso o problema persista, entre em contato com o suporte técnico.'
+            'Erro na atualização. Verifique os dados e tente novamente.'
           )
         }
       }
