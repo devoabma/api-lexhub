@@ -38,7 +38,7 @@ export async function createTypeService(app: FastifyInstance) {
 
         if (serviceType) {
           throw new BadRequestError(
-            ' O tipo de serviço informado já consta em nossa base de dados. Por favor, insira um nome único para prosseguir com o cadastro.'
+            'Tipo de serviço já cadastrado. Insira um nome único.'
           )
         }
 
