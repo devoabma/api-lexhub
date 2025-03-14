@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { auth } from 'http/middlewares/auth'
-import { API_PROTHEUS_DATA_URL, API_PROTHEUS_FIN_URL } from 'lib/axios'
+import { API_PROTHEUS_DATA_URL } from 'lib/axios'
 import { prisma } from 'lib/prisma'
 import { z } from 'zod'
 
@@ -42,15 +42,6 @@ export async function createService(app: FastifyInstance) {
         const agentId = await request.getCurrentAgentId()
 
         const { oab, serviceTypeId, observation, assistance } = request.body
-
-        // Busca na API do Protheus se o advogado está adimplente
-        const { data } = await API_PROTHEUS_FIN_URL(`/${oab}`)
-
-        if (!data) {
-          throw new UnauthorizedError(
-            'Não foi possível prosseguir com o atendimento no momento. Por favor, entre em contato com o setor financeiro para mais informações.'
-          )
-        }
 
         // Verifica se o advogado já está cadastrado no banco de dados
         let lawyer = await prisma.lawyer.findUnique({

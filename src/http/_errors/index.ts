@@ -43,7 +43,7 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
   if (error instanceof AxiosError) {
     return reply.status(404).send({
       message:
-        'Nenhum registro correspondente para o número da OAB informado. Por favor, verifique os dados e tente novamente.',
+        'Nenhum registro correspondente para o número de OAB informado. Por favor, verifique os dados e tente novamente.',
     })
   }
 
