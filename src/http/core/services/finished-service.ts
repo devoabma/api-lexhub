@@ -35,13 +35,13 @@ export async function finishedService(app: FastifyInstance) {
 
         if (!service) {
           throw new UnauthorizedError(
-            ' O atendimento solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
+            'O atendimento não foi encontrado. Verifique os dados e tente novamente.'
           )
         }
 
         if (service.status === 'COMPLETED') {
           throw new UnauthorizedError(
-            ' O atendimento solicitado já foi finalizado. Por favor, verifique os dados informados e tente novamente.'
+            'O atendimento já foi finalizado. Verifique os dados e tente novamente.'
           )
         }
 

@@ -121,9 +121,10 @@ export async function getAllServices(app: FastifyInstance) {
                   },
                 },
               },
-              orderBy: {
-                createdAt: 'desc',
-              },
+              orderBy: [
+                { status: 'asc' }, // OPEN antes de COMPLETED
+                { createdAt: 'desc' }, // Mais recentes primeiro
+              ],
               skip: (pageIndex - 1) * 10, // Pular os primeiros 10 atendimentos
               take: 10, // Recuperar apenas 10 atendimentos
             }),
