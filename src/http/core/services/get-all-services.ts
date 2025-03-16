@@ -123,6 +123,7 @@ export async function getAllServices(app: FastifyInstance) {
               },
               orderBy: [
                 { status: 'asc' }, // OPEN antes de COMPLETED
+                { finishedAt: 'desc' }, // Mais recentes primeiro
                 { createdAt: 'desc' }, // Mais recentes primeiro
               ],
               skip: (pageIndex - 1) * 10, // Pular os primeiros 10 atendimentos
