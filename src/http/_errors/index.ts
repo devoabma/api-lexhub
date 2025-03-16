@@ -43,7 +43,7 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
   if (error instanceof AxiosError) {
     return reply.status(404).send({
       message:
-        'Consulta indisponível ou advogado não encontrado para o número de OAB informado. Por favor, verifique os dados e tente novamente.',
+        'Consulta indisponível ou advogado(a) não encontrado. Verifique os dados e tente novamente mais tarde.',
     })
   }
 

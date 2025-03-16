@@ -28,7 +28,7 @@ export async function createService(app: FastifyInstance) {
           security: [{ bearerAuth: [] }],
           body: z.object({
             oab: z.string(),
-            serviceTypeId: z.array(z.object({ id: z.string().cuid() })),
+            serviceTypeId: z.array(z.string().cuid()),
             observation: z.string().optional(),
             assistance: z.enum(['PERSONALLY', 'REMOTE']),
             status: z.enum(['OPEN', 'COMPLETED']).default('OPEN'),
@@ -76,13 +76,13 @@ export async function createService(app: FastifyInstance) {
           serviceTypeId.map(async serviceType => {
             const type = await prisma.serviceTypes.findUnique({
               where: {
-                id: serviceType.id,
+                id: serviceType,
               },
             })
 
             if (!type) {
               throw new UnauthorizedError(
-                ' Tipo de serviço não encontrado. Verifique as informações e tente novamente.'
+                'Tipo de serviço não encontrado. Verifique as informações e tente novamente.'
               )
             }
 

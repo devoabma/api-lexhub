@@ -21,6 +21,7 @@ import { getAllQuantityServicesInMonth } from 'http/core/services/get-all-quanti
 import { getAllQuantityServicesInYear } from 'http/core/services/get-all-quantity-services-in-year'
 import { getAllServices } from 'http/core/services/get-all-services'
 import { getAllTypesServices } from 'http/core/services/get-all-types-services'
+import { getAllTypesServicesWithoutPagination } from 'http/core/services/get-all-types-services-without-pagination'
 import { updateTypeService } from 'http/core/services/update-type-service'
 import { createAccountService } from '../core/agents/create-account'
 
@@ -50,6 +51,7 @@ export async function routes(app: FastifyInstance) {
   app.register(finishedService)
   app.register(cancelService)
   app.register(getAllQuantityServices)
+  app.register(getAllTypesServicesWithoutPagination)
   app.register(getAllQuantityServicesInMonth)
   app.register(getAllQuantityServicesInYear)
   app.register(getAllQuantityServicesByAgent)
