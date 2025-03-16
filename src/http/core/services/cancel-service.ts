@@ -35,13 +35,13 @@ export async function cancelService(app: FastifyInstance) {
 
         if (!service) {
           throw new UnauthorizedError(
-            ' O serviço solicitado não foi localizado em nossa base de dados. Por favor, verifique as informações e tente novamente.'
+            'O serviço solicitado não foi localizado em nossa base de dados. Por favor, verifique as informações e tente novamente.'
           )
         }
 
         if (service.status !== 'OPEN') {
           throw new UnauthorizedError(
-            ' O serviço solicitado já foi finalizado. Por favor, verifique as informações e tente novamente.'
+            'O serviço solicitado já foi finalizado. Por favor, verifique as informações e tente novamente.'
           )
         }
 
@@ -53,7 +53,7 @@ export async function cancelService(app: FastifyInstance) {
           return reply.status(204).send()
         } catch (err) {
           throw new UnauthorizedError(
-            ' Ocorreu um erro para cancelar o atendimento. Por favor, verifique os dados informados e tente novamente.'
+            'Ocorreu um erro para cancelar o atendimento. Por favor, verifique os dados informados e tente novamente.'
           )
         }
       }
