@@ -2,8 +2,14 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { auth } from 'http/middlewares/auth'
-import { API_PROTHEUS_FIN_URL } from 'lib/axios'
+import { API_PROTHEUS_DATA_URL, API_PROTHEUS_FIN_URL } from 'lib/axios'
 import { z } from 'zod'
+
+interface LawyersProps {
+  lawyer: {
+    nome: string
+  }
+}
 
 export async function consultLawyer(app: FastifyInstance) {
   app
@@ -20,7 +26,9 @@ export async function consultLawyer(app: FastifyInstance) {
             oab: z.string(),
           }),
           response: {
-            200: z.null(),
+            200: z.object({
+              name: z.string(),
+            }),
           },
         },
       },
@@ -32,13 +40,26 @@ export async function consultLawyer(app: FastifyInstance) {
         // Busca na API do Protheus se o advogado está adimplente
         const { data } = await API_PROTHEUS_FIN_URL(`/${oab}`)
 
+        const {
+          data: { lawyer },
+        } = await API_PROTHEUS_DATA_URL<LawyersProps>('/', {
+          params: {
+            idOrg: 10,
+            param: oab,
+          },
+        })
+
         if (!data) {
+          const name = lawyer?.nome
+
           throw new UnauthorizedError(
-            'Infelizmente não será possível prosseguir com o atendimento no momento. Por favor, entre em contato com o Setor Financeiro para mais informações.'
+            `Prezado(a) ${name}, não podemos prosseguir com o atendimento. Para mais informações, entre em contato com o Setor Financeiro.`
           )
         }
 
-        return reply.status(200).send()
+        return reply.status(200).send({
+          name: lawyer?.nome,
+        })
       }
     )
 }
