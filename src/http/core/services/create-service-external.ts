@@ -19,7 +19,6 @@ export async function createServiceExternal(app: FastifyInstance) {
           body: z.object({
             oab: z.string(),
             name: z.string(),
-            cpf: z.string(),
             email: z.string().email(),
             serviceTypeId: z.array(z.string().cuid()),
             observation: z.string().optional(),
@@ -34,15 +33,8 @@ export async function createServiceExternal(app: FastifyInstance) {
       async (request, reply) => {
         const agentId = await request.getCurrentAgentId()
 
-        const {
-          oab,
-          name,
-          cpf,
-          email,
-          serviceTypeId,
-          observation,
-          assistance,
-        } = request.body
+        const { oab, name, email, serviceTypeId, observation, assistance } =
+          request.body
 
         // Verifica se o advogado já está cadastrado no banco de dados
         let lawyer = await prisma.lawyer.findUnique({
@@ -56,7 +48,6 @@ export async function createServiceExternal(app: FastifyInstance) {
             data: {
               oab,
               name,
-              cpf,
               email,
             },
           })

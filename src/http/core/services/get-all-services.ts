@@ -37,7 +37,6 @@ export async function getAllServices(app: FastifyInstance) {
                   lawyer: z.object({
                     id: z.string().uuid(),
                     name: z.string(),
-                    cpf: z.string(),
                     oab: z.string(),
                     email: z.string(),
                   }),
@@ -97,7 +96,6 @@ export async function getAllServices(app: FastifyInstance) {
                   select: {
                     id: true,
                     name: true,
-                    cpf: true,
                     oab: true,
                     email: true,
                   },

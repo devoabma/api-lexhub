@@ -47,7 +47,6 @@ model Token {
 model Lawyer {
   id        String   @id @default(uuid())
   name      String
-  cpf       String   @unique
   oab       String   @unique
   email     String   @unique
   createdAt DateTime @default(now()) @map("created_at")

@@ -9,7 +9,6 @@ import { z } from 'zod'
 interface LawyersProps {
   lawyer: {
     nome: string
-    cpf: string
     registro: string
     email: string
   }
@@ -64,7 +63,6 @@ export async function createService(app: FastifyInstance) {
           lawyer = await prisma.lawyer.create({
             data: {
               name: lawyerData.nome,
-              cpf: lawyerData.cpf,
               oab: lawyerData.registro,
               email: lawyerData.email,
             },
