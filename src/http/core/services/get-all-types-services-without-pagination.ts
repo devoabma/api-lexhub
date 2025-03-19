@@ -31,8 +31,7 @@ export async function getAllTypesServicesWithoutPagination(
         },
       },
       async (request, reply) => {
-        // Somente administradores podem listar todos os funcionários
-        await request.checkIfAgentIsAdmin()
+        await request.getCurrentAgentId()
 
         const servicesTypes = await prisma.serviceTypes.findMany({
           select: {
