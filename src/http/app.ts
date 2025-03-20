@@ -69,8 +69,9 @@ app.register(fastifyCors, {
 })
 
 app.register(fastifyRateLimit, {
-  max: 100, // quantidade máxima de requisicoes por IP
-  timeWindow: '5 minute', // tempo de bloqueio
+  max: 100, // Máximo de 100 requisições
+  timeWindow: '1 minute', // Por minuto
+  cache: 10000, // Cache de requisições para melhor desempenho
 })
 
 app.register(routes)
