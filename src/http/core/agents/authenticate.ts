@@ -1,6 +1,7 @@
 import { compare } from 'bcryptjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
+import { env } from 'http/_env'
 import { BadRequestError } from 'http/_errors/bad-request-error'
 import { prisma } from 'lib/prisma'
 import { z } from 'zod'
@@ -74,8 +75,9 @@ export async function authenticate(app: FastifyInstance) {
         .setCookie('@lexhub-auth', token, {
           path: '/',
           httpOnly: true,
-          sameSite: true,
+          sameSite: 'lax',
           maxAge: 1000 * 60 * 60 * 24, // 1 day
+          domain: env.NODE_ENV === 'PRODUCTION' ? env.WEB_URL : undefined,
         })
         .status(201)
         .send({
