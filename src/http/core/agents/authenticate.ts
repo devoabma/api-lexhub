@@ -77,7 +77,7 @@ export async function authenticate(app: FastifyInstance) {
           httpOnly: true,
           sameSite: 'lax',
           maxAge: 1000 * 60 * 60 * 24, // 1 day
-          domain: env.NODE_ENV === 'PRODUCTION' ? env.WEB_URL : undefined,
+          domain: env.WEB_URL,
         })
         .status(201)
         .send({
