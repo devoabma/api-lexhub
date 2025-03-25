@@ -1,7 +1,6 @@
 import { compare } from 'bcryptjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { env } from 'http/_env'
 import { BadRequestError } from 'http/_errors/bad-request-error'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { prisma } from 'lib/prisma'
@@ -78,8 +77,7 @@ export async function authenticate(app: FastifyInstance) {
             path: '/',
             httpOnly: true,
             sameSite: true,
-            secure: env.NODE_ENV === 'production',
-            maxAge: 60 * 60 * 24, // 1 day
+            maxAge: 60 * 60 * 24,
           })
           .status(201)
           .send({
