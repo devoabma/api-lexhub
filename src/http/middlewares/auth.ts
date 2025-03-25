@@ -13,7 +13,7 @@ export const auth = fastifyPlugin(async (app: FastifyInstance) => {
         return sub
       } catch {
         throw new UnauthorizedError(
-          ' Token inválido ou expirado. Faça login novamente.'
+          'Token inválido ou expirado. Faça login novamente.'
         )
       }
     }
@@ -22,7 +22,7 @@ export const auth = fastifyPlugin(async (app: FastifyInstance) => {
       // Verifica o token primeiro
       const { sub } = await request.jwtVerify<{ sub: string }>().catch(() => {
         throw new UnauthorizedError(
-          ' Token inválido ou expirado. Verifique as informações e tente novamente.'
+          'Token inválido ou expirado. Verifique as informações e tente novamente.'
         )
       })
 
@@ -34,13 +34,13 @@ export const auth = fastifyPlugin(async (app: FastifyInstance) => {
 
       if (!agent) {
         throw new UnauthorizedError(
-          ' Funcionário não encontrado. Verifique os dados e tente novamente.'
+          'Funcionário não encontrado. Verifique os dados e tente novamente.'
         )
       }
 
       if (agent.role === 'MEMBER') {
         throw new UnauthorizedError(
-          ' Permissão negada. Você precisa ser um administrador para realizar esta ação.'
+          'Permissão negada. Você precisa ser um administrador para realizar esta ação.'
         )
       }
     }

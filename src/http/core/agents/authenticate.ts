@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { env } from 'http/_env'
 import { BadRequestError } from 'http/_errors/bad-request-error'
+import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { prisma } from 'lib/prisma'
 import { z } from 'zod'
 
@@ -57,31 +58,37 @@ export async function authenticate(app: FastifyInstance) {
         )
       }
 
-      // Criação do token de autenticação
-      const token = await reply.jwtSign(
-        {
-          // Envia o id do usuário para o token
-          sub: userFromEmail.id,
-          role: userFromEmail.role,
-        },
-        {
-          sign: {
-            expiresIn: '1d',
+      try {
+        // Criação do token de autenticação
+        const token = await reply.jwtSign(
+          {
+            // Envia o id do usuário para o token
+            sub: userFromEmail.id,
+            role: userFromEmail.role,
           },
-        }
-      )
+          {
+            sign: {
+              expiresIn: '1d',
+            },
+          }
+        )
 
-      return reply
-        .setCookie('@lexhub-auth', token, {
-          path: '/',
-          httpOnly: true,
-          sameSite: true,
-          maxAge: 60 * 60 * 24, // 1 day
-        })
-        .status(201)
-        .send({
-          token,
-        })
+        return reply
+          .setCookie('@lexhub-auth', token, {
+            path: '/',
+            httpOnly: true,
+            sameSite: true,
+            maxAge: 60 * 60 * 24, // 1 day
+          })
+          .status(201)
+          .send({
+            token,
+          })
+      } catch (err) {
+        throw new UnauthorizedError(
+          'Erro ao se autenticar. Verifique suas informações e tente novamente.'
+        )
+      }
     }
   )
 }

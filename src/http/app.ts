@@ -20,9 +20,6 @@ export const app = fastify().withTypeProvider<ZodTypeProvider>()
 app.setSerializerCompiler(serializerCompiler)
 app.setValidatorCompiler(validatorCompiler)
 
-// Configura o tratamento de erros globais da API
-app.setErrorHandler(errorHandler)
-
 // Configura o swagger para documentação da API
 app.register(fastifySwagger, {
   openapi: {
@@ -51,8 +48,6 @@ app.register(fastifySwaggerUi, {
   routePrefix: '/docs', // rota para acessar a documentação
 })
 
-app.register(fastifyCookie)
-
 app.register(fastifyJwt, {
   secret: env.JWT_SECRET,
   cookie: {
@@ -68,6 +63,8 @@ app.register(fastifyCors, {
   credentials: true, // permite cookies
 })
 
+app.register(fastifyCookie)
+
 app.register(fastifyRateLimit, {
   max: 100, // Máximo de 100 requisições
   timeWindow: '1 minute', // Por minuto
@@ -75,3 +72,6 @@ app.register(fastifyRateLimit, {
 })
 
 app.register(routes)
+
+// Configura o tratamento de erros globais da API
+app.setErrorHandler(errorHandler)
