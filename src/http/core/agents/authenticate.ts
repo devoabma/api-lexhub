@@ -78,6 +78,7 @@ export async function authenticate(app: FastifyInstance) {
             path: '/',
             httpOnly: true,
             sameSite: true,
+            secure: env.NODE_ENV === 'production',
             maxAge: 60 * 60 * 24, // 1 day
           })
           .status(201)
