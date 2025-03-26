@@ -26,21 +26,9 @@ export async function getAllQuantityServices(app: FastifyInstance) {
       async (request, reply) => {
         await request.getCurrentAgentId()
 
-        try {
-          const services = await prisma.services.count()
+        const services = await prisma.services.count()
 
-          if (!services) {
-            throw new BadRequestError(
-              ' Não existem atendimentos cadastrados ainda. Tente novamente mais tarde.'
-            )
-          }
-
-          return reply.status(200).send({ total: services })
-        } catch (error) {
-          throw new BadRequestError(
-            ' Ocorreu um erro ao buscar os atendimentos cadastrados'
-          )
-        }
+        return reply.status(200).send({ total: services })
       }
     )
 }
