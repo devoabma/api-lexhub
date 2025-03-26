@@ -77,7 +77,7 @@ export async function authenticate(app: FastifyInstance) {
             path: '/',
             httpOnly: true,
             sameSite: true,
-            maxAge: 60 * 60 * 24,
+            maxAge: 60 * 60 * 24, // 1 dia
           })
           .status(201)
           .send({
