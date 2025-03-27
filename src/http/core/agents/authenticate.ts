@@ -75,8 +75,6 @@ export async function authenticate(app: FastifyInstance) {
         return reply
           .setCookie('@lexhub-auth', token, {
             path: '/',
-            httpOnly: true,
-            sameSite: true,
             maxAge: 60 * 60 * 24, // 1 dia
           })
           .status(201)
