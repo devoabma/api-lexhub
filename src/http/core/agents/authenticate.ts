@@ -57,35 +57,31 @@ export async function authenticate(app: FastifyInstance) {
         )
       }
 
-      try {
-        // Criação do token de autenticação
-        const token = await reply.jwtSign(
-          {
-            // Envia o id do usuário para o token
-            sub: userFromEmail.id,
-            role: userFromEmail.role,
+      // Criação do token de autenticação
+      const token = await reply.jwtSign(
+        {
+          // Envia o id do usuário para o token
+          sub: userFromEmail.id,
+          role: userFromEmail.role,
+        },
+        {
+          sign: {
+            expiresIn: '1d',
           },
-          {
-            sign: {
-              expiresIn: '1d',
-            },
-          }
-        )
+        }
+      )
 
-        return reply
-          .setCookie('@lexhub-auth', token, {
-            path: '/',
-            maxAge: 60 * 60 * 24, // 1 dia
-          })
-          .status(201)
-          .send({
-            token,
-          })
-      } catch (err) {
-        throw new UnauthorizedError(
-          'Erro ao se autenticar. Verifique suas informações e tente novamente.'
-        )
-      }
+      return reply
+        .setCookie('@lexhub-auth', token, {
+          path: '/',
+          httpOnly: true,
+          sameSite: true,
+          maxAge: 60 * 60 * 24,
+        })
+        .status(201)
+        .send({
+          token,
+        })
     }
   )
 }
