@@ -41,7 +41,7 @@ async function requestPasswordRecover(app) {
         await resend_1.resend.emails.send({
             from: '📧 OAB Atende <oabatende@oabma.com.br>',
             // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
-            to: _env_1.env.NODE_ENV === 'PRODUCTION' ? email : 'hilquiasfmelo@hotmail.com',
+            to: _env_1.env.NODE_ENV === 'production' ? email : 'hilquiasfmelo@hotmail.com',
             subject: '🔄 Redefinição de Senha - OAB Atende',
             react: (0, reset_password_email_1.ResetPasswordEmail)({
                 name: agentFromEmail.name,
@@ -56,7 +56,7 @@ async function requestPasswordRecover(app) {
             });
         }, 120000);
         // Somente em ambiente de desenvolvimento mostra no console
-        if (_env_1.env.NODE_ENV === 'DEVELOPMENT') {
+        if (_env_1.env.NODE_ENV === 'development') {
             console.log('> ✅ Email de redefinição de senha enviado com sucesso.', code);
         }
         return reply.status(200).send();
