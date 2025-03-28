@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../../src/http/_types/fastify.d.ts"],"sourcesContent":["import 'fastify'\n\ndeclare module 'fastify' {\n  export interface FastifyRequest {\n    getCurrentAgentId(): Promise<string>\n    checkIfAgentIsAdmin(): Promise<void>\n  }\n}\n"],"mappings":";;;AAAA,qBAAO;","names":[]}
