@@ -1,1 +1,0 @@
-{"version":3,"sources":["../../../src/http/_errors/bad-request-error.ts"],"sourcesContent":["export class BadRequestError extends Error {}\n"],"mappings":";;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAO,IAAM,kBAAN,cAA8B,MAAM;AAAC;","names":[]}
