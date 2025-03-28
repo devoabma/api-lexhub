@@ -48,7 +48,7 @@ export async function requestPasswordRecover(app: FastifyInstance) {
       await resend.emails.send({
         from: '📧 OAB Atende <oabatende@oabma.com.br>',
         // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
-        to: env.NODE_ENV === 'PRODUCTION' ? email : 'hilquiasfmelo@hotmail.com',
+        to: env.NODE_ENV === 'production' ? email : 'hilquiasfmelo@hotmail.com',
         subject: '🔄 Redefinição de Senha - OAB Atende',
         react: ResetPasswordEmail({
           name: agentFromEmail.name,
@@ -65,7 +65,7 @@ export async function requestPasswordRecover(app: FastifyInstance) {
       }, 120000)
 
       // Somente em ambiente de desenvolvimento mostra no console
-      if (env.NODE_ENV === 'DEVELOPMENT') {
+      if (env.NODE_ENV === 'development') {
         console.log(
           '> ✅ Email de redefinição de senha enviado com sucesso.',
           code
