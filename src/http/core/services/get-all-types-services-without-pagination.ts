@@ -40,7 +40,7 @@ export async function getAllTypesServicesWithoutPagination(
           },
           orderBy: [
             {
-              createdAt: 'desc', // Mostra os tipos de serviços mais recentes primeiro
+              createdAt: 'asc', // Mostra os tipos de serviços por ordem de criação
             },
           ],
         })
