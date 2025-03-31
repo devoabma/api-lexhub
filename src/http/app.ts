@@ -66,8 +66,8 @@ app.register(fastifyCors, {
 app.register(fastifyCookie)
 
 app.register(fastifyRateLimit, {
-  max: 100, // Máximo de 100 requisições
-  timeWindow: '1 minute', // Por minuto
+  max: 1000,
+  timeWindow: '1 minute',
   cache: 10000, // Cache de requisições para melhor desempenho
 })
 
