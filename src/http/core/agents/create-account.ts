@@ -50,20 +50,20 @@ export async function createAccountService(app: FastifyInstance) {
 
         const passwordHash = await hash(password, 8)
 
-        // Envia email de boas vindas para o novo funcionário com seus dados
-        await resend.emails.send({
-          from: '📧 OAB Atende <oabatende@oabma.com.br>',
-          to: email,
-          subject: '🎉 Bem-vindo à equipe! Aqui estão suas informações.',
-          react: AgentRegistrationEmail({
-            name,
-            email,
-            tempPassword: password,
-            link: env.WEB_URL,
-          }),
-        })
-
         try {
+          // Envia email de boas vindas para o novo funcionário com seus dados
+          await resend.emails.send({
+            from: '📧 OAB Atende <oabatende@oabma.com.br>',
+            to: email,
+            subject: '🎉 Bem-vindo à equipe! Aqui estão suas informações.',
+            react: AgentRegistrationEmail({
+              name,
+              email,
+              tempPassword: password,
+              link: env.WEB_URL,
+            }),
+          })
+
           await prisma.agent.create({
             data: {
               name,
