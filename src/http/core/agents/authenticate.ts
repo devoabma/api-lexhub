@@ -66,7 +66,7 @@ export async function authenticate(app: FastifyInstance) {
         },
         {
           sign: {
-            expiresIn: '1d',
+            expiresIn: '1d', // 1 dia
           },
         }
       )
@@ -78,7 +78,7 @@ export async function authenticate(app: FastifyInstance) {
           secure: env.NODE_ENV === 'production',
           sameSite: 'lax',
           domain: env.DOMAIN,
-          maxAge: 60 * 60 * 24,
+          maxAge: 60 * 60 * 24, // 1 dia
         })
         .status(201)
         .send({ token })
