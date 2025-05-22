@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { auth } from 'http/middlewares/auth'
+import { API_PROTHEUS_FIN_URL } from 'lib/axios'
 import { prisma } from 'lib/prisma'
 import z from 'zod'
 
@@ -49,6 +50,21 @@ export async function createServiceExternal(app: FastifyInstance) {
               oab,
               name,
               email,
+            },
+          })
+        }
+
+        // Busca na API do Protheus se o advogado está adimplente
+        const { data } = await API_PROTHEUS_FIN_URL(`/${oab}`)
+
+        // Se o advogado estiver inadimplente atualiza o campo restrictedServiceCount adicionando unico atendimento
+        if (!data) {
+          lawyer = await prisma.lawyer.update({
+            where: {
+              oab,
+            },
+            data: {
+              restrictedServiceCount: new Date(),
             },
           })
         }

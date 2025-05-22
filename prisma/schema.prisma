@@ -45,11 +45,12 @@ model Token {
 }
 
 model Lawyer {
-  id        String   @id @default(uuid())
-  name      String
-  oab       String   @unique
-  email     String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
+  id                     String    @id @default(uuid())
+  name                   String
+  oab                    String    @unique
+  email                  String    @unique
+  restrictedServiceCount DateTime?
+  createdAt              DateTime  @default(now()) @map("created_at")
 
   services Services[]
 
