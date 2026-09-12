@@ -111,6 +111,8 @@ O JWT continua válido até expirar (não há blacklist).
 
 Body `{ "email": "…" }`. Sempre `200` sem corpo (não revela se o e-mail existe).
 Se existir, envia e-mail com código de 6 caracteres válido por ~2 minutos.
+Se o Resend recusar o envio, o token é descartado, o erro vai para o log e a
+resposta continua `200`.
 
 ### `POST /agents/password/reset` 🌐
 
@@ -129,8 +131,9 @@ Se existir, envia e-mail com código de 6 caracteres válido por ~2 minutos.
 { "name": "Fulano", "email": "fulano@oabma.org.br", "password": "senhaProvisoria" }
 ```
 
-Cria como `MEMBER` e envia e-mail de boas-vindas com a senha provisória.
-`201` · `409` (e-mail duplicado) · `400` (falha no envio/gravação) · `403` (não admin).
+Grava como `MEMBER` e envia e-mail de boas-vindas com a senha provisória, na mesma
+transação. `201` · `409` (e-mail duplicado) · `502` (Resend recusou o envio; nada é
+gravado) · `500` (falha na gravação; nenhum e-mail sai) · `403` (não admin).
 
 ### `GET /agents/all` 👑
 

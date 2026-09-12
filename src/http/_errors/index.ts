@@ -1,6 +1,7 @@
 import { AxiosError } from 'axios'
 import type { FastifyInstance } from 'fastify'
 import { ZodError } from 'zod'
+import { BadGatewayError } from './bad-gateway-error'
 import { BadRequestError } from './bad-request-error'
 import { ConflictError } from './conflict-error'
 import { ForbiddenError } from './forbidden-error'
@@ -57,6 +58,15 @@ export const errorHandler: FastifyErrorHandler = (error, request, reply) => {
 
   if (error instanceof UnprocessableEntityError) {
     return reply.status(422).send({
+      message: error.message,
+    })
+  }
+
+  // Falha de provedor externo (ex.: Resend); a causa fica só no log
+  if (error instanceof BadGatewayError) {
+    console.error(error)
+
+    return reply.status(502).send({
       message: error.message,
     })
   }

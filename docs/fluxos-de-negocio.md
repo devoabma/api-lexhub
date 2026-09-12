@@ -94,10 +94,20 @@ sequenceDiagram
   A->>API: POST /agents { name, email, password }
   API->>API: checkIfAgentIsAdmin
   API->>DB: e-mail já existe? (409)
-  API->>R: e-mail de boas-vindas (inclui a senha provisória em texto)
+  Note over API,DB: transação
   API->>DB: cria agent (role MEMBER, hash bcrypt)
-  API-->>A: 201
+  API->>R: e-mail de boas-vindas (inclui a senha provisória em texto)
+  alt Resend recusou o envio
+    API->>DB: rollback (o agent não fica gravado)
+    API-->>A: 502
+  else e-mail aceito
+    API->>DB: commit
+    API-->>A: 201
+  end
 ```
+
+Gravação e envio são uma operação única: se o Resend recusar o e-mail, o cadastro é
+desfeito; se a gravação falhar, nenhum e-mail sai (`500`).
 
 O administrador define a senha provisória. O e-mail diz que a troca é obrigatória,
 mas o sistema **não força** a troca no primeiro acesso ([DT-01](debitos-tecnicos.md#dt-01)).
@@ -126,9 +136,14 @@ sequenceDiagram
   participant R as Resend
   U->>API: POST /agents/password/recover { email }
   alt e-mail existe
-    API->>DB: cria token PASSWORD_RECOVER (código 6 chars)
+    API->>DB: cria token PASSWORD_RECOVER (código 6 chars), em transação
     API->>R: e-mail com código + link WEB_URL/reset-password?code=
-    API->>API: setTimeout(2 min) → apaga token
+    alt Resend recusou o envio
+      API->>DB: rollback (token descartado) + erro no log
+    else e-mail aceito
+      API->>DB: commit
+      API->>API: setTimeout(2 min) → apaga token
+    end
   end
   API-->>U: 200 (sempre)
   U->>API: POST /agents/password/reset { code, password }

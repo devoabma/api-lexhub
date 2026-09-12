@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { env } from 'http/_env'
 import { prisma } from 'lib/prisma'
-import { resend } from 'lib/resend'
+import { EmailDeliveryError, sendEmail } from 'lib/resend'
 import { ResetPasswordEmail } from 'utils/emails/reset-password-email'
 import { generateRecoveryCode } from 'utils/generate-recovery-code'
 import { z } from 'zod'
@@ -37,25 +37,53 @@ export async function requestPasswordRecover(app: FastifyInstance) {
         return reply.status(200).send()
       }
 
-      const { code } = await prisma.token.create({
-        data: {
-          type: 'PASSWORD_RECOVER',
-          agentId: agentFromEmail.id,
-          code: generateRecoveryCode(),
-        },
-      })
+      let code: string
 
-      await resend.emails.send({
-        from: '📧 OAB Atende <oabatende@oabma.org.br>',
-        // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
-        to: env.NODE_ENV === 'production' ? email : 'hilquiasfmelo@hotmail.com',
-        subject: '🔄 Redefinição de Senha - OAB Atende',
-        react: ResetPasswordEmail({
-          name: agentFromEmail.name,
-          code,
-          link: `${env.WEB_URL}/reset-password?code=${code}`,
-        }),
-      })
+      try {
+        // Grava o token e envia na mesma transação: se o e-mail falhar, o
+        // token é desfeito e não sobra código que ninguém recebeu
+        code = await prisma.$transaction(
+          async tx => {
+            const token = await tx.token.create({
+              data: {
+                type: 'PASSWORD_RECOVER',
+                agentId: agentFromEmail.id,
+                code: generateRecoveryCode(),
+              },
+            })
+
+            await sendEmail({
+              from: '📧 OAB Atende <oabatende@oabma.org.br>',
+              // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
+              to:
+                env.NODE_ENV === 'production'
+                  ? email
+                  : 'hilquiasfmelo@hotmail.com',
+              subject: '🔄 Redefinição de Senha - OAB Atende',
+              react: ResetPasswordEmail({
+                name: agentFromEmail.name,
+                code: token.code,
+                link: `${env.WEB_URL}/reset-password?code=${token.code}`,
+              }),
+            })
+
+            return token.code
+          },
+          { timeout: 15_000 }
+        )
+      } catch (err) {
+        if (!(err instanceof EmailDeliveryError)) {
+          throw err
+        }
+
+        // Responde 200 mesmo assim para não revelar que o e-mail existe
+        console.error(
+          '> Falha ao enviar o e-mail de redefinição de senha:',
+          err
+        )
+
+        return reply.status(200).send()
+      }
 
       // Excluir o token após 2 minutos (120000ms)
       setTimeout(async () => {

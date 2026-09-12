@@ -35,6 +35,12 @@ Não há distinção entre "advogado não existe" e "Protheus fora do ar" ([DT-2
 Cliente em `src/lib/resend.ts` (`RESEND_API_KEY`). Remetente: `📧 OAB Atende <oabatende@oabma.org.br>`
 (o domínio precisa estar verificado no Resend).
 
+As rotas enviam pelo helper `sendEmail`, nunca por `resend.emails.send()` direto: o SDK 4.x
+não lança quando o envio falha (devolve `{ data, error }`), e o helper converte o `error` em
+`EmailDeliveryError`. No cadastro de funcionário a falha desfaz a gravação e responde `502`;
+na recuperação de senha o token é descartado e a resposta continua `200`. Nos dois casos o
+erro do Resend vai para o log do servidor (pm2).
+
 | Template (`src/utils/emails/`) | Assunto | Disparado por | Dados |
 |---|---|---|---|
 | `agent-registration-email.tsx` | 🎉 Bem-vindo à equipe! Aqui estão suas informações. | `POST /agents` | nome, e-mail, senha provisória, link `WEB_URL` |

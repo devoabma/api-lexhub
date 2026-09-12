@@ -157,6 +157,7 @@ Definido em `src/http/_errors/index.ts`. As rotas lançam as classes de erro de
 | `NotFoundError` | 404 | recurso do caminho (`:id`) não existe |
 | `ConflictError` | 409 | duplicidade ou estado incompatível (ex.: atendimento já finalizado) |
 | `UnprocessableEntityError` | 422 | regra de negócio impede a operação (ex.: advogado inadimplente) |
+| `BadGatewayError` | 502 (logado com `console.error`) | provedor externo recusou a operação (ex.: envio de e-mail pelo Resend) |
 | Rate limit | 429 | |
 | `AxiosError` (qualquer falha do Protheus) | 404 | |
 | Demais | 500 (logado com `console.error`) | falhas inesperadas, inclusive do banco |

@@ -20,7 +20,7 @@ Ao propor uma mudança no OpenSpec, cite o ID (ex.: "resolve DT-02").
 | [DT-11](#dt-11) | ✅ | Negócio | ~~Gráfico mensal soma todos os anos e carrega a tabela inteira~~ (change `dashboard-metrics-report`) |
 | [DT-12](#dt-12) | 🟠 | Negócio | Criação de atendimento sem transação |
 | [DT-13](#dt-13) | 🟠 | Negócio | `lawyers.email` único quebra com dados do Protheus; OAB sem normalização |
-| [DT-14](#dt-14) | 🟡 | Negócio | E-mail de boas-vindas enviado antes de gravar o funcionário |
+| [DT-14](#dt-14) | ✅ | Negócio | ~~E-mail de boas-vindas enviado antes de gravar o funcionário~~ (change `tratar-falha-envio-email`) |
 | [DT-15](#dt-15) | ◐ | Negócio | ~~Qualquer funcionário finaliza/cancela atendimento de outro~~; cancelamento sem auditoria |
 | [DT-16](#dt-16) | ✅ | Negócio | ~~Métricas dependem do fuso horário do servidor~~ (change `dashboard-metrics-report`) |
 | [DT-17](#dt-17) | 🟡 | Negócio | Admin pode rebaixar/inativar a si mesmo (ou o último admin) |
@@ -157,10 +157,15 @@ Dados do advogado local nunca são atualizados a partir do Protheus.
 **Sugestão:** remover unicidade do e-mail, normalizar OAB, atualizar nome/e-mail no atendimento.
 
 <a id="dt-14"></a>
-### DT-14 🟡 Ordem e-mail × gravação no cadastro de funcionário
+### DT-14 ✅ Ordem e-mail × gravação no cadastro de funcionário
 
-O e-mail de boas-vindas é enviado antes do `prisma.agent.create`; se a gravação falhar, a
-pessoa recebe credenciais que não existem. **Sugestão:** gravar primeiro, enviar depois (ou fila).
+**Resolvido** pela change `tratar-falha-envio-email`: gravação e envio do e-mail de boas-vindas
+ficam na mesma transação, com o `create` primeiro. Se o Resend recusar o envio, o cadastro é
+desfeito e a API responde `502`; se a gravação falhar, nenhum e-mail sai.
+
+Antes: o e-mail saía antes do `prisma.agent.create` (credenciais de um funcionário inexistente
+se a gravação falhasse) e, como o SDK do Resend não lança, uma falha de envio passava em
+silêncio com `201`.
 
 <a id="dt-15"></a>
 ### DT-15 ◐ Autorização e auditoria de atendimentos
@@ -209,10 +214,10 @@ Mapa completo por endpoint no `design.md` da change e em [api.md](api.md).
 
 **Parcial**: os `try/catch` que convertiam falhas de escrita em `401` foram removidos
 (`active-agent`, `inactive-agent`, `update-agent`, `update-type-service`, `finished-service` e
-`cancel-service`); a falha segue para o handler global (`500`, com log).
-Restam os `try/catch` das listagens e de `create-account`, que descartam o erro original e
-lançam `BadRequestError` genérico, e checagens como `if (!agents)` sobre arrays, que nunca são
-verdadeiras.
+`cancel-service`), assim como o de `create-account` (change `tratar-falha-envio-email`); a
+falha segue para o handler global (`500`, com log).
+Restam os `try/catch` das listagens, que descartam o erro original e lançam `BadRequestError`
+genérico, e checagens como `if (!agents)` sobre arrays, que nunca são verdadeiras.
 
 <a id="dt-22"></a>
 ### DT-22 🟡 Erros de validação sem detalhes

@@ -25,7 +25,8 @@ mudar, atualize a spec (via change) e o documento correspondente em `docs/`.
 - Rotas protegidas: `.register(auth)` + `request.getCurrentAgent()` / `getCurrentAgentId()` ou `request.checkIfAgentIsAdmin()`
   (o middleware recusa token inválido/expirado e funcionário inexistente ou inativo com 401)
 - Erros de domínio (`src/http/_errors`): `BadRequestError` (400), `ForbiddenError` (403),
-  `NotFoundError` (404), `ConflictError` (409), `UnprocessableEntityError` (422).
+  `NotFoundError` (404), `ConflictError` (409), `UnprocessableEntityError` (422),
+  `BadGatewayError` (502, falha de provedor externo, ex.: Resend).
   `UnauthorizedError` (401) é **exclusivo** do middleware de auth (sessão inválida) — nunca use em rotas
 - Imports resolvidos por `baseUrl: ./src` (ex.: `import { prisma } from 'lib/prisma'`)
 - Biome: aspas simples, sem ponto e vírgula, 2 espaços, 80 colunas, `arrowParentheses: asNeeded`
