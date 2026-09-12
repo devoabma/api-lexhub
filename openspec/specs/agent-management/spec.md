@@ -1,0 +1,82 @@
+# agent-management Specification
+
+## Purpose
+
+Gestão do cadastro de funcionários (agents) por administradores: criação com
+envio de e-mail de boas-vindas, listagem paginada com filtros, edição de dados e
+papel, e ativação/inativação. Inclui o seed do administrador inicial.
+
+## Requirements
+
+### Requirement: Administrador inicial via seed
+O sistema SHALL fornecer o seed `prisma/seed/index.ts` (`pnpm prisma db seed`) que MUST criar o funcionário "Gerência de Tecnologia da Informação" com `role = ADMIN`, e-mail `EMAIL_ADMIN_FULL` e senha `PASSWORD_ADMIN_FULL`, somente se ainda não existir funcionário com esse e-mail.
+
+#### Scenario: Primeira execução
+- **WHEN** o seed roda em um banco sem o e-mail do administrador
+- **THEN** o administrador é criado e o console exibe `Administrador criado com sucesso.`
+
+#### Scenario: Execução repetida
+- **WHEN** o seed roda e o administrador já existe
+- **THEN** nada é alterado e o console exibe `Administrador já existente na base de dados.`
+
+### Requirement: Criação de funcionário
+O sistema SHALL permitir que um administrador crie um funcionário via `POST /agents` com `{ name, email, password }` (senha com mín. 8) e MUST responder `201` sem corpo.
+
+O novo funcionário MUST ser criado com `role = MEMBER`. Antes de gravar, o sistema MUST enviar o e-mail "🎉 Bem-vindo à equipe!" ao novo funcionário contendo nome, e-mail, a senha informada (como senha provisória) e o link `WEB_URL`.
+
+#### Scenario: Criação bem-sucedida
+- **WHEN** um administrador envia dados válidos com e-mail ainda não cadastrado
+- **THEN** o e-mail de boas-vindas é enviado, o funcionário é gravado como `MEMBER` e o sistema responde `201`
+
+#### Scenario: E-mail duplicado
+- **WHEN** já existe funcionário com o mesmo e-mail
+- **THEN** o sistema responde `400` com `E-mail já cadastrado para outro funcionário.`
+
+#### Scenario: Falha no envio do e-mail ou na gravação
+- **WHEN** o envio pelo Resend ou a gravação no banco lança erro
+- **THEN** o sistema responde `400` com `Erro ao criar funcionário. Por favor, tente novamente.`
+
+#### Scenario: Solicitante não administrador
+- **WHEN** um `MEMBER` chama a rota
+- **THEN** o sistema responde `401` com a mensagem de permissão negada
+
+### Requirement: Listagem de funcionários
+O sistema SHALL permitir que um administrador liste funcionários via `GET /agents/all` com paginação fixa de 10 itens (`pageIndex`, base 1, padrão 1) e filtros opcionais `name` (contém, sem diferenciar maiúsculas) e `role` (`ADMIN`|`MEMBER`), MUST ordenar do mais recente para o mais antigo e responder `200` com `{ agents: [{ id, name, email, role, inactive }], total }`.
+
+#### Scenario: Filtro por nome
+- **WHEN** um administrador consulta `GET /agents/all?name=silva&pageIndex=2`
+- **THEN** o sistema retorna até 10 funcionários cujo nome contém "silva", pulando os 10 primeiros, e o `total` de correspondências
+
+#### Scenario: Erro de consulta
+- **WHEN** a consulta ao banco falha
+- **THEN** o sistema responde `400` com `Não foi possível recuperar os atendimentos. Tente novamente mais tarde.`
+
+### Requirement: Atualização de funcionário
+O sistema SHALL permitir que um administrador altere `name`, `email` e/ou `role` de um funcionário via `PUT /agents/update/:id` (id UUID), respondendo `204`, e MUST rejeitar a troca para um e-mail já usado por outro funcionário.
+
+#### Scenario: Atualização válida
+- **WHEN** um administrador envia novo nome e papel para um funcionário existente
+- **THEN** os dados são atualizados e o sistema responde `204`
+
+#### Scenario: Funcionário inexistente
+- **WHEN** o id não corresponde a nenhum funcionário
+- **THEN** o sistema responde `401` com `Funcionário não encontrado. Verifique os dados e tente novamente.`
+
+#### Scenario: E-mail em uso
+- **WHEN** o novo e-mail já pertence a outro funcionário
+- **THEN** o sistema responde `401` com `E-mail já cadastrado. Verifique as informações e tente novamente.`
+
+### Requirement: Inativação e reativação de funcionário
+O sistema SHALL permitir que um administrador inative um funcionário via `PATCH /agents/inactive/:id` (grava a data atual em `inactive`) e o reative via `PATCH /agents/active/:id` (grava `inactive = null`), respondendo `204` em ambos. Funcionários inativos MUST NOT conseguir fazer login.
+
+#### Scenario: Inativar
+- **WHEN** um administrador inativa um funcionário existente
+- **THEN** o campo `inactive` recebe a data/hora atual e o sistema responde `204`
+
+#### Scenario: Reativar
+- **WHEN** um administrador reativa um funcionário inativo
+- **THEN** o campo `inactive` volta a `null` e o funcionário pode fazer login novamente
+
+#### Scenario: Funcionário inexistente
+- **WHEN** o id não corresponde a nenhum funcionário
+- **THEN** o sistema responde `401` com `O funcionário não foi encontrado. Verifique os dados informados e tente novamente.`

@@ -1,0 +1,63 @@
+schema: spec-driven
+
+# Contexto do projeto — injetado em todas as instruções de artefatos do OpenSpec.
+context: |
+  Projeto: API LexHub ("OAB Atende") — backend do sistema de gestão de atendimentos
+  a advogados(as) da OAB Seccional Maranhão. Funcionários ("agents") registram
+  atendimentos ("services") prestados a advogados ("lawyers"), classificados por
+  tipos de serviço ("service types"). Antes de atender, a API consulta o ERP TOTVS
+  Protheus para obter os dados cadastrais do advogado e verificar adimplência.
+
+  Stack:
+  - Node.js 22, TypeScript 5 (module/moduleResolution node16, strict)
+  - Fastify 5 + fastify-type-provider-zod 4 (Zod 3 para validação e serialização)
+  - Prisma 6 + PostgreSQL 17
+  - @fastify/jwt (JWT em cookie httpOnly "@lexhub-auth" ou header Bearer), @fastify/cookie,
+    @fastify/cors, @fastify/rate-limit, @fastify/swagger + swagger-ui (/docs)
+  - Resend + @react-email/components para e-mails transacionais (TSX)
+  - axios para as APIs Protheus (API_PROTHEUS_DATA_URL, API_PROTHEUS_FIN_URL)
+  - dayjs para cálculos de datas (métricas no fuso America/Fortaleza, via src/lib/dayjs.ts);
+    bcryptjs para hash de senha
+  - pdfkit para o relatório de atendimentos em PDF (src/utils/reports)
+  - Build com tsup (saída em build/), dev com tsx watch, pnpm como gerenciador
+  - Biome para lint/format (aspas simples, sem ponto e vírgula, 2 espaços, 80 colunas)
+  - Deploy: GitHub Actions (push em main) -> SCP/SSH para servidor da OAB -> pm2 restart api-lexhub
+
+  Organização do código:
+  - src/http/server.ts (listen), src/http/app.ts (plugins), src/http/routes/index.ts (registro de rotas)
+  - Um arquivo por rota em src/http/core/agents/*, src/http/core/services/* e
+    src/http/core/metrics/*;
+    cada arquivo exporta uma função async (app: FastifyInstance) que registra a rota
+  - Rotas autenticadas fazem .register(auth) e chamam request.getCurrentAgentId()
+    ou request.checkIfAgentIsAdmin() (src/http/middlewares/auth.ts)
+  - Erros de domínio em src/http/_errors: BadRequestError (400), ForbiddenError (403),
+    NotFoundError (404), ConflictError (409) e UnprocessableEntityError (422).
+    UnauthorizedError (401) é exclusivo do middleware de auth: sessão ausente, inválida
+    ou expirada, ou funcionário inexistente/inativo. O errorHandler global mapeia também
+    ZodError/validação (400), 429, AxiosError (404) e 500
+  - O middleware (getCurrentAgent) busca o funcionário no banco uma vez por requisição;
+    POST /agents/logout é público e idempotente
+  - Imports usam baseUrl ./src (ex.: 'http/_env', 'lib/prisma', 'utils/...')
+  - Mensagens de erro e textos de usuário em português (pt-BR)
+
+  Não há testes automatizados nem script de lint no package.json.
+  Documentação humana em docs/ (arquitetura, API, modelo de dados, fluxos,
+  ambiente/deploy e débitos técnicos). Consulte docs/debitos-tecnicos.md antes de
+  propor mudanças — ele lista problemas conhecidos com IDs (DT-xx).
+
+# Regras por artefato (somam-se às instruções padrão do schema).
+rules:
+  proposal:
+    - Escreva em português (pt-BR).
+    - 'Quando a mudança resolver um item de docs/debitos-tecnicos.md, cite o ID (ex.: DT-03).'
+    - Aponte explicitamente mudanças que quebram o contrato com o frontend (lexhub web) como **BREAKING**.
+  specs:
+    - 'Escreva o texto em português, mas mantenha os marcadores exigidos pelo validador em inglês - "### Requirement:", "#### Scenario:", "**WHEN**", "**THEN**", "**AND**" e a palavra-chave SHALL ou MUST no corpo do requisito (ex.: "O sistema SHALL ...").'
+    - Use os nomes de capacidade existentes em openspec/specs/ para deltas MODIFIED.
+    - Cite método e rota HTTP e códigos de status quando o requisito descrever um endpoint.
+  design:
+    - Escreva em português (pt-BR).
+    - Considere impacto em migrations Prisma, no deploy via CI (prisma migrate deploy) e no frontend.
+  tasks:
+    - Escreva em português (pt-BR).
+    - Inclua tarefa de migration Prisma quando o schema mudar e tarefa de atualizar docs/ quando o comportamento documentado mudar.
