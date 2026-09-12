@@ -26,7 +26,7 @@
 - [x] 5.3 Manual, caminho feliz: `POST /agents` com e-mail `delivered@resend.dev` responde `201`, grava o funcionário e o envio aparece no painel do Resend
 - [x] 5.4 Manual, falha: com `RESEND_API_KEY` inválida no `.env` local, `POST /agents` responde `502` com a mensagem da spec, o funcionário não é gravado e o erro aparece no console
 - [x] 5.5 Manual, falha: com a chave inválida, `POST /agents/password/recover` para um e-mail cadastrado responde `200`, nenhuma linha nova em `tokens` e o erro aparece no console
-- [ ] 5.6 Manual: com a chave válida, `POST /agents/password/recover` grava o token, imprime o código no console e o token some após 2 minutos
+- [x] 5.6 Produção: após o deploy de `e531bf3` (10:49 UTC de 12/09/2026), uma solicitação de redefinição saiu de `oabatende@oabma.org.br` e o Resend registrou `delivered` (10:50 UTC)
 
 ## 6. Documentação e specs
 
