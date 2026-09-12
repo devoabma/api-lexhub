@@ -63,4 +63,4 @@ jobs:
           pnpm install
           pnpm prisma generate
           pnpm prisma migrate deploy
-          pm2 restart api-lexhub
+          pm2 restart lexhub-api
