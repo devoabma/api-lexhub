@@ -4,9 +4,7 @@
 
 Permitir que um funcionário redefina a própria senha sem estar autenticado,
 por meio de um código de 6 caracteres enviado por e-mail (Resend).
-
 ## Requirements
-
 ### Requirement: Solicitação de recuperação de senha
 O sistema SHALL receber `POST /agents/password/recover` com `{ email }` (rota pública) e MUST sempre responder `200` sem corpo, independentemente de o e-mail existir, para não revelar quais e-mails estão cadastrados.
 
@@ -40,8 +38,9 @@ O token MUST NOT ser removido após o uso (a remoção depende apenas do timer d
 
 #### Scenario: Código inválido ou expirado
 - **WHEN** o código não existe na tabela `tokens`
-- **THEN** o sistema responde `401` com `Código de redefinição de senha inválido. Verifique e tente novamente.`
+- **THEN** o sistema responde `400` com `Código de redefinição de senha inválido. Verifique e tente novamente.`
 
 #### Scenario: Nova senha igual à atual
 - **WHEN** a nova senha confere com o hash atual
-- **THEN** o sistema responde `401` com `A nova senha deve ser diferente da atual. Escolha outra senha e tente novamente.`
+- **THEN** o sistema responde `400` com `A nova senha deve ser diferente da atual. Escolha outra senha e tente novamente.`
+

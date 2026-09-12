@@ -5,9 +5,7 @@
 Ciclo de vida de um atendimento (service) prestado a um advogado: criação
 (com cadastro automático do advogado a partir do Protheus ou com dados informados
 manualmente), listagem com filtros, finalização e cancelamento.
-
 ## Requirements
-
 ### Requirement: Criação de atendimento com dados do Protheus
 O sistema SHALL criar um atendimento via `POST /services` (autenticado) com `{ oab, serviceTypeId: string[] (CUIDs), observation?, assistance: PERSONALLY|REMOTE }`, vinculado ao funcionário do token, com `status = OPEN`, e MUST responder `201` sem corpo.
 
@@ -25,7 +23,7 @@ Esta rota MUST NOT verificar adimplência; a verificação é feita previamente 
 
 #### Scenario: Tipo de serviço inexistente
 - **WHEN** algum id de `serviceTypeId` não existe
-- **THEN** o sistema responde `401` com `Tipo de serviço não encontrado. Verifique as informações e tente novamente.`
+- **THEN** o sistema responde `400` com `Tipo de serviço não encontrado. Verifique as informações e tente novamente.`
 - **AND** nenhum atendimento é criado
 
 #### Scenario: Múltiplos tipos
@@ -44,6 +42,10 @@ Esta rota é usada quando o advogado não é localizado no Protheus ou para o at
 #### Scenario: Advogado já existente
 - **WHEN** a OAB já existe em `lawyers`
 - **THEN** nome e e-mail enviados são ignorados e o registro existente é usado
+
+#### Scenario: Tipo de serviço inexistente
+- **WHEN** algum id de `serviceTypeId` não existe
+- **THEN** o sistema responde `400` com `Tipo de serviço não encontrado. Verifique os dados e tente novamente.`
 
 ### Requirement: Listagem de atendimentos
 O sistema SHALL listar atendimentos via `GET /services/all` (autenticado) com paginação de 10 itens (`pageIndex`, padrão 1) e filtros opcionais `oab`, `lawyerName`, `agentName` (contém, sem diferenciar maiúsculas), `assistance` e `status`, e MUST responder `200` com `{ services, total }`.
@@ -65,27 +67,54 @@ Todos os funcionários veem os atendimentos de todos os funcionários.
 - **THEN** o sistema responde `400` com mensagem de erro ao recuperar os atendimentos
 
 ### Requirement: Finalização de atendimento
-O sistema SHALL finalizar um atendimento via `PATCH /services/finished/:id` (autenticado, id UUID), gravando `status = COMPLETED` e `finishedAt` com a data/hora atual, e MUST responder `204`. Qualquer funcionário autenticado pode finalizar qualquer atendimento.
+O sistema SHALL finalizar um atendimento via `PATCH /services/finished/:id` (autenticado, id UUID), gravando `status = COMPLETED` e `finishedAt` com a data/hora atual, e MUST responder `204`.
 
-#### Scenario: Finalizar atendimento aberto
-- **WHEN** um funcionário finaliza um atendimento com status `OPEN`
+Somente o funcionário que registrou o atendimento (`services.agent_id`) ou um funcionário com `role = ADMIN` MUST poder finalizá-lo. As verificações MUST seguir a ordem: existência (`404`), autorização (`403`), status (`409`).
+
+#### Scenario: Finalizar atendimento aberto próprio
+- **WHEN** o funcionário que registrou o atendimento o finaliza com status `OPEN`
 - **THEN** o status passa a `COMPLETED`, `finishedAt` é preenchido e o sistema responde `204`
 
+#### Scenario: Administrador finaliza atendimento de outro funcionário
+- **WHEN** um `ADMIN` finaliza um atendimento `OPEN` registrado por outro funcionário
+- **THEN** o atendimento é finalizado e o sistema responde `204`
+
+#### Scenario: Membro tenta finalizar atendimento de outro funcionário
+- **WHEN** um `MEMBER` tenta finalizar um atendimento registrado por outro funcionário
+- **THEN** o sistema responde `403` com `Somente o funcionário que registrou o atendimento ou um administrador pode finalizá-lo.`
+- **AND** o atendimento não é alterado
+
 #### Scenario: Atendimento já finalizado
-- **WHEN** o atendimento já está `COMPLETED`
-- **THEN** o sistema responde `401` com `O atendimento já foi finalizado. Verifique os dados e tente novamente.`
+- **WHEN** o dono ou um administrador tenta finalizar um atendimento já `COMPLETED`
+- **THEN** o sistema responde `409` com `O atendimento já foi finalizado. Verifique os dados e tente novamente.`
 
 #### Scenario: Atendimento inexistente
 - **WHEN** o id não existe
-- **THEN** o sistema responde `401` com `O atendimento não foi encontrado. Verifique os dados e tente novamente.`
+- **THEN** o sistema responde `404` com `O atendimento não foi encontrado. Verifique os dados e tente novamente.`
 
 ### Requirement: Cancelamento de atendimento em aberto
-O sistema SHALL cancelar um atendimento via `DELETE /services/cancel/:id` (autenticado, id UUID) somente enquanto estiver `OPEN`, MUST excluir fisicamente o registro (e, em cascata, seus vínculos com tipos) e responder `204`. Qualquer funcionário autenticado pode cancelar qualquer atendimento em aberto.
+O sistema SHALL cancelar um atendimento via `DELETE /services/cancel/:id` (autenticado, id UUID) somente enquanto estiver `OPEN`, MUST excluir fisicamente o registro (e, em cascata, seus vínculos com tipos) e responder `204`.
 
-#### Scenario: Cancelar atendimento aberto
-- **WHEN** um funcionário cancela um atendimento `OPEN`
+Somente o funcionário que registrou o atendimento ou um funcionário com `role = ADMIN` MUST poder cancelá-lo. As verificações MUST seguir a ordem: existência (`404`), autorização (`403`), status (`409`).
+
+#### Scenario: Cancelar atendimento aberto próprio
+- **WHEN** o funcionário que registrou o atendimento o cancela com status `OPEN`
 - **THEN** o atendimento e seus vínculos em `service_service_types` são removidos e o sistema responde `204`
 
+#### Scenario: Administrador cancela atendimento de outro funcionário
+- **WHEN** um `ADMIN` cancela um atendimento `OPEN` registrado por outro funcionário
+- **THEN** o atendimento é removido e o sistema responde `204`
+
+#### Scenario: Membro tenta cancelar atendimento de outro funcionário
+- **WHEN** um `MEMBER` tenta cancelar um atendimento registrado por outro funcionário
+- **THEN** o sistema responde `403` com `Somente o funcionário que registrou o atendimento ou um administrador pode cancelá-lo.`
+- **AND** nada é removido
+
 #### Scenario: Cancelar atendimento finalizado
-- **WHEN** o atendimento está `COMPLETED`
-- **THEN** o sistema responde `401` com `O serviço solicitado já foi finalizado...` e nada é removido
+- **WHEN** o dono ou um administrador tenta cancelar um atendimento `COMPLETED`
+- **THEN** o sistema responde `409` com `O serviço solicitado já foi finalizado...` e nada é removido
+
+#### Scenario: Atendimento inexistente
+- **WHEN** o id não existe
+- **THEN** o sistema responde `404` com `O serviço solicitado não foi localizado em nossa base de dados...`
+

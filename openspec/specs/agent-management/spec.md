@@ -5,9 +5,7 @@
 Gestão do cadastro de funcionários (agents) por administradores: criação com
 envio de e-mail de boas-vindas, listagem paginada com filtros, edição de dados e
 papel, e ativação/inativação. Inclui o seed do administrador inicial.
-
 ## Requirements
-
 ### Requirement: Administrador inicial via seed
 O sistema SHALL fornecer o seed `prisma/seed/index.ts` (`pnpm prisma db seed`) que MUST criar o funcionário "Gerência de Tecnologia da Informação" com `role = ADMIN`, e-mail `EMAIL_ADMIN_FULL` e senha `PASSWORD_ADMIN_FULL`, somente se ainda não existir funcionário com esse e-mail.
 
@@ -30,7 +28,7 @@ O novo funcionário MUST ser criado com `role = MEMBER`. Antes de gravar, o sist
 
 #### Scenario: E-mail duplicado
 - **WHEN** já existe funcionário com o mesmo e-mail
-- **THEN** o sistema responde `400` com `E-mail já cadastrado para outro funcionário.`
+- **THEN** o sistema responde `409` com `E-mail já cadastrado para outro funcionário.`
 
 #### Scenario: Falha no envio do e-mail ou na gravação
 - **WHEN** o envio pelo Resend ou a gravação no banco lança erro
@@ -38,7 +36,7 @@ O novo funcionário MUST ser criado com `role = MEMBER`. Antes de gravar, o sist
 
 #### Scenario: Solicitante não administrador
 - **WHEN** um `MEMBER` chama a rota
-- **THEN** o sistema responde `401` com a mensagem de permissão negada
+- **THEN** o sistema responde `403` com a mensagem de permissão negada
 
 ### Requirement: Listagem de funcionários
 O sistema SHALL permitir que um administrador liste funcionários via `GET /agents/all` com paginação fixa de 10 itens (`pageIndex`, base 1, padrão 1) e filtros opcionais `name` (contém, sem diferenciar maiúsculas) e `role` (`ADMIN`|`MEMBER`), MUST ordenar do mais recente para o mais antigo e responder `200` com `{ agents: [{ id, name, email, role, inactive }], total }`.
@@ -60,18 +58,26 @@ O sistema SHALL permitir que um administrador altere `name`, `email` e/ou `role`
 
 #### Scenario: Funcionário inexistente
 - **WHEN** o id não corresponde a nenhum funcionário
-- **THEN** o sistema responde `401` com `Funcionário não encontrado. Verifique os dados e tente novamente.`
+- **THEN** o sistema responde `404` com `Funcionário não encontrado. Verifique os dados e tente novamente.`
 
 #### Scenario: E-mail em uso
 - **WHEN** o novo e-mail já pertence a outro funcionário
-- **THEN** o sistema responde `401` com `E-mail já cadastrado. Verifique as informações e tente novamente.`
+- **THEN** o sistema responde `409` com `E-mail já cadastrado. Verifique as informações e tente novamente.`
+
+#### Scenario: Solicitante não administrador
+- **WHEN** um `MEMBER` chama a rota
+- **THEN** o sistema responde `403` com a mensagem de permissão negada
 
 ### Requirement: Inativação e reativação de funcionário
-O sistema SHALL permitir que um administrador inative um funcionário via `PATCH /agents/inactive/:id` (grava a data atual em `inactive`) e o reative via `PATCH /agents/active/:id` (grava `inactive = null`), respondendo `204` em ambos. Funcionários inativos MUST NOT conseguir fazer login.
+O sistema SHALL permitir que um administrador inative um funcionário via `PATCH /agents/inactive/:id` (grava a data atual em `inactive`) e o reative via `PATCH /agents/active/:id` (grava `inactive = null`), respondendo `204` em ambos. Funcionários inativos MUST NOT conseguir fazer login e MUST ter as sessões abertas recusadas com `401` a partir da requisição seguinte à inativação.
 
 #### Scenario: Inativar
 - **WHEN** um administrador inativa um funcionário existente
 - **THEN** o campo `inactive` recebe a data/hora atual e o sistema responde `204`
+
+#### Scenario: Sessão aberta do funcionário inativado
+- **WHEN** o funcionário inativado faz uma nova requisição com o token que já possuía
+- **THEN** o sistema responde `401` com `Seu acesso foi desativado. Procure o administrador do sistema.`
 
 #### Scenario: Reativar
 - **WHEN** um administrador reativa um funcionário inativo
@@ -79,4 +85,5 @@ O sistema SHALL permitir que um administrador inative um funcionário via `PATCH
 
 #### Scenario: Funcionário inexistente
 - **WHEN** o id não corresponde a nenhum funcionário
-- **THEN** o sistema responde `401` com `O funcionário não foi encontrado. Verifique os dados informados e tente novamente.`
+- **THEN** o sistema responde `404` com `O funcionário não foi encontrado. Verifique os dados informados e tente novamente.`
+
