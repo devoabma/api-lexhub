@@ -85,6 +85,7 @@ model Services {
   @@index([lawyerId])
   @@index([agentId])
   @@index([status])
+  @@index([createdAt])
   @@map("services")
 }
 

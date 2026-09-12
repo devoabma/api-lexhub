@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { env } from 'http/_env'
 import { BadRequestError } from 'http/_errors/bad-request-error'
+import { ConflictError } from 'http/_errors/conflict-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
 import { resend } from 'lib/resend'
@@ -43,7 +44,7 @@ export async function createAccountService(app: FastifyInstance) {
         })
 
         if (userWithSameEmail) {
-          throw new BadRequestError(
+          throw new ConflictError(
             'E-mail já cadastrado para outro funcionário.'
           )
         }

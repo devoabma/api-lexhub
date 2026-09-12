@@ -1,45 +1,69 @@
+import type { Role } from '@prisma/client'
 import type { FastifyInstance } from 'fastify'
 import { fastifyPlugin } from 'fastify-plugin'
+import { ForbiddenError } from 'http/_errors/forbidden-error'
 import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { prisma } from 'lib/prisma'
 
+interface CurrentAgent {
+  id: string
+  role: Role
+}
+
 export const auth = fastifyPlugin(async (app: FastifyInstance) => {
   app.addHook('preHandler', async request => {
-    request.getCurrentAgentId = async () => {
-      try {
-        // Verifica se o token é valido e retorna o sub
-        const { sub } = await request.jwtVerify<{ sub: string }>()
+    // Guarda a busca do funcionário da sessão: vários helpers chamados na
+    // mesma requisição geram uma única consulta ao banco
+    let currentAgent: Promise<CurrentAgent> | undefined
 
-        return sub
-      } catch {
+    async function loadCurrentAgent(): Promise<CurrentAgent> {
+      // Verifica se o token é valido e pega o sub
+      const { sub } = await request.jwtVerify<{ sub: string }>().catch(() => {
+        throw new UnauthorizedError(
+          'Token inválido ou expirado. Faça login novamente.'
+        )
+      })
+
+      // O papel e a inatividade vêm do banco, não do JWT
+      const agent = await prisma.agent.findUnique({
+        where: { id: sub },
+        select: { id: true, role: true, inactive: true },
+      })
+
+      // Funcionário removido do banco: a sessão deixa de valer
+      if (!agent) {
         throw new UnauthorizedError(
           'Token inválido ou expirado. Faça login novamente.'
         )
       }
-    }
 
-    request.checkIfAgentIsAdmin = async () => {
-      // Verifica o token primeiro
-      const { sub } = await request.jwtVerify<{ sub: string }>().catch(() => {
+      // Funcionário inativado perde o acesso na hora, mesmo com token válido
+      if (agent.inactive) {
         throw new UnauthorizedError(
-          'Token inválido ou expirado. Verifique as informações e tente novamente.'
-        )
-      })
-
-      // Busca o agente no banco de dados
-      const agent = await prisma.agent.findUnique({
-        where: { id: sub },
-        select: { role: true },
-      })
-
-      if (!agent) {
-        throw new UnauthorizedError(
-          'Funcionário não encontrado. Verifique os dados e tente novamente.'
+          'Seu acesso foi desativado. Procure o administrador do sistema.'
         )
       }
 
-      if (agent.role === 'MEMBER') {
-        throw new UnauthorizedError(
+      return { id: agent.id, role: agent.role }
+    }
+
+    request.getCurrentAgent = () => {
+      currentAgent ??= loadCurrentAgent()
+
+      return currentAgent
+    }
+
+    request.getCurrentAgentId = async () => {
+      const { id } = await request.getCurrentAgent()
+
+      return id
+    }
+
+    request.checkIfAgentIsAdmin = async () => {
+      const { role } = await request.getCurrentAgent()
+
+      if (role !== 'ADMIN') {
+        throw new ForbiddenError(
           'Permissão negada. Você precisa ser um administrador para realizar esta ação.'
         )
       }

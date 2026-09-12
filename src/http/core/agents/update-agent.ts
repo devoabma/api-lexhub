@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { UnauthorizedError } from 'http/_errors/unauthorized-error'
+import { ConflictError } from 'http/_errors/conflict-error'
+import { NotFoundError } from 'http/_errors/not-found-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
 import z from 'zod'
@@ -41,7 +42,7 @@ export async function updateAgent(app: FastifyInstance) {
         })
 
         if (!agent) {
-          throw new UnauthorizedError(
+          throw new NotFoundError(
             'Funcionário não encontrado. Verifique os dados e tente novamente.'
           )
         }
@@ -54,31 +55,25 @@ export async function updateAgent(app: FastifyInstance) {
           })
 
           if (emailExists) {
-            throw new UnauthorizedError(
+            throw new ConflictError(
               'E-mail já cadastrado. Verifique as informações e tente novamente.'
             )
           }
         }
 
-        try {
-          await prisma.agent.update({
-            where: {
-              id,
-            },
-            data: {
-              name,
-              email,
-              role,
-              updatedAt: new Date(),
-            },
-          })
+        await prisma.agent.update({
+          where: {
+            id,
+          },
+          data: {
+            name,
+            email,
+            role,
+            updatedAt: new Date(),
+          },
+        })
 
-          return reply.status(204).send()
-        } catch (err) {
-          throw new UnauthorizedError(
-            'Falha na atualização. Verifique os dados e tente novamente.'
-          )
-        }
+        return reply.status(204).send()
       }
     )
 }

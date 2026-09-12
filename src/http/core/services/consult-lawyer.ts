@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { UnauthorizedError } from 'http/_errors/unauthorized-error'
+import { UnprocessableEntityError } from 'http/_errors/unprocessable-entity-error'
 import { auth } from 'http/middlewares/auth'
 import { API_PROTHEUS_DATA_URL, API_PROTHEUS_FIN_URL } from 'lib/axios'
 import { prisma } from 'lib/prisma'
@@ -67,21 +67,21 @@ export async function consultLawyer(app: FastifyInstance) {
           ? dayjs(restrictedServiceCount).format('DD/MM/YYYY')
           : null
 
-        console.log({ formattedLawyerRestrictionService })
-
+        // Inadimplência é regra de negócio sobre o advogado (422), não falha
+        // da sessão do funcionário
         if (!data) {
           const name = lawyer?.nome
 
           if (formattedLawyerRestrictionService) {
-            throw new UnauthorizedError(
+            throw new UnprocessableEntityError(
               `Prezado(a) ${name}, não é possível prosseguir com o atendimento.
                Para mais informações, entre em contato com o Setor Financeiro.
                Advogado(a) atendido(a) anteriormente em ${formattedLawyerRestrictionService}.`
             )
           }
 
-          throw new UnauthorizedError(
-            `Prezado(a) ${name}, não podemos prosseguir com o atendimento. 
+          throw new UnprocessableEntityError(
+            `Prezado(a) ${name}, não podemos prosseguir com o atendimento.
              Para mais informações, entre em contato com o Setor Financeiro.`
           )
         }

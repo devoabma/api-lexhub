@@ -1,8 +1,8 @@
-import dayjs from 'dayjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { auth } from 'http/middlewares/auth'
-import { prisma } from 'lib/prisma'
+import { currentDate, monthPeriod, previousMonth } from 'utils/metrics/period'
+import { countServices } from 'utils/metrics/queries'
 import z from 'zod'
 
 export async function getAllQuantityServicesInMonth(app: FastifyInstance) {
@@ -27,47 +27,18 @@ export async function getAllQuantityServicesInMonth(app: FastifyInstance) {
       async (request, reply) => {
         await request.getCurrentAgentId()
 
-        // Obtém a data atual
-        const now = dayjs()
+        // Mês atual e anterior no fuso da OAB Maranhão
+        const { year, month } = currentDate()
+        const previous = previousMonth(year, month)
 
-        // Obtém o primeiro dia do mês atual
-        const startOfMonth = now.startOf('month').toDate()
-
-        // Obtém o último dia do mês atual
-        const endOfMonth = now.endOf('month').toDate()
-
-        // Conta os atendimentos que foram criados no mês atual
-        const servicesInMonth = await prisma.services.count({
-          where: {
-            createdAt: {
-              gte: startOfMonth, // maior ou igual ao primeiro dia do mês
-              lte: endOfMonth, // menor ou igual ao último dia do mês
-            },
-          },
-        })
-
-        // Lógica para o mês anterior
-        const startOfPreviousMonth = now
-          .subtract(1, 'month')
-          .startOf('month')
-          .toDate()
-        const endOfPreviousMonth = now
-          .subtract(1, 'month')
-          .endOf('month')
-          .toDate()
-
-        const previousMonthServices = await prisma.services.count({
-          where: {
-            createdAt: {
-              gte: startOfPreviousMonth,
-              lte: endOfPreviousMonth,
-            },
-          },
-        })
+        const [totalCurrentMonth, totalPreviousMonth] = await Promise.all([
+          countServices(monthPeriod(year, month)),
+          countServices(monthPeriod(previous.year, previous.month)),
+        ])
 
         return reply.status(200).send({
-          totalCurrentMonth: servicesInMonth,
-          totalPreviousMonth: previousMonthServices,
+          totalCurrentMonth,
+          totalPreviousMonth,
         })
       }
     )

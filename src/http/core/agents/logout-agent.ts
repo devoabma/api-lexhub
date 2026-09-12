@@ -1,50 +1,30 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { env } from 'http/_env'
-import { BadRequestError } from 'http/_errors/bad-request-error'
-import { auth } from 'http/middlewares/auth'
-import { prisma } from 'lib/prisma'
 import z from 'zod'
 
 export async function logoutAgent(app: FastifyInstance) {
-  app
-    .withTypeProvider<ZodTypeProvider>()
-    .register(auth)
-    .post(
-      '/agents/logout',
-      {
-        schema: {
-          tags: ['agents'],
-          summary: 'Desloga o funcionário logado',
-          security: [{ bearerAuth: [] }],
-          response: {
-            200: z.null(),
-          },
+  // Rota pública e idempotente: funciona mesmo com o token expirado
+  app.withTypeProvider<ZodTypeProvider>().post(
+    '/agents/logout',
+    {
+      schema: {
+        tags: ['agents'],
+        summary: 'Desloga o funcionário, com ou sem token válido',
+        response: {
+          200: z.null(),
         },
       },
-      async (request, reply) => {
-        const agentId = await request.getCurrentAgentId()
-
-        // Retorna o usuário somente com os dados necessários
-        const agent = await prisma.agent.findUnique({
-          where: {
-            id: agentId,
-          },
+    },
+    async (_request, reply) => {
+      // Mesmos atributos do login, condição para o navegador apagar o cookie
+      return reply
+        .clearCookie('@lexhub-auth', {
+          path: '/',
+          domain: env.DOMAIN,
         })
-
-        if (!agent) {
-          throw new BadRequestError(
-            ' O funcionário solicitado não foi localizado em nossa base de dados. Por favor, verifique os dados informados e tente novamente.'
-          )
-        }
-
-        return reply
-          .clearCookie('@lexhub-auth', {
-            path: '/',
-            domain: env.DOMAIN,
-          })
-          .status(200)
-          .send()
-      }
-    )
+        .status(200)
+        .send()
+    }
+  )
 }

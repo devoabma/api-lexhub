@@ -9,12 +9,19 @@ import { logoutAgent } from 'http/core/agents/logout-agent'
 import { requestPasswordRecover } from 'http/core/agents/request-password-recover'
 import { resetPassword } from 'http/core/agents/reset-password'
 import { updateAgent } from 'http/core/agents/update-agent'
+import { getServicesDaily } from 'http/core/metrics/get-services-daily'
+import { getServicesMonthly } from 'http/core/metrics/get-services-monthly'
+import { getServicesReport } from 'http/core/metrics/get-services-report'
+import { getServicesYearly } from 'http/core/metrics/get-services-yearly'
+import { getTopAgents } from 'http/core/metrics/get-top-agents'
+import { getTopLawyers } from 'http/core/metrics/get-top-lawyers'
 import { cancelService } from 'http/core/services/cancel-service'
 import { consultLawyer } from 'http/core/services/consult-lawyer'
 import { createService } from 'http/core/services/create-service'
 import { createServiceExternal } from 'http/core/services/create-service-external'
 import { createTypeService } from 'http/core/services/create-type-service'
 import { finishedService } from 'http/core/services/finished-service'
+import { getAllQuantityServicesPerDay } from 'http/core/services/get-all-quantity-per-day'
 import { getAllQuantityServices } from 'http/core/services/get-all-quantity-services'
 import { getAllQuantityServicesByAgent } from 'http/core/services/get-all-quantity-services-by-agent'
 import { getAllQuantityServicesInMonth } from 'http/core/services/get-all-quantity-services-in-month'
@@ -22,10 +29,9 @@ import { getAllQuantityServicesInYear } from 'http/core/services/get-all-quantit
 import { getAllServices } from 'http/core/services/get-all-services'
 import { getAllTypesServices } from 'http/core/services/get-all-types-services'
 import { getAllTypesServicesWithoutPagination } from 'http/core/services/get-all-types-services-without-pagination'
+import { getServicesByMonthForChart } from 'http/core/services/get-services-by-month-for-chart'
 import { updateTypeService } from 'http/core/services/update-type-service'
 import { createAccountService } from '../core/agents/create-account'
-import { getServicesByMonthForChart } from 'http/core/services/get-services-by-month-for-chart'
-import { getAllQuantityServicesPerDay } from 'http/core/services/get-all-quantity-per-day'
 
 export async function routes(app: FastifyInstance) {
   // Rotas de agents
@@ -59,4 +65,12 @@ export async function routes(app: FastifyInstance) {
   app.register(getAllQuantityServicesByAgent)
   app.register(getAllQuantityServicesPerDay)
   app.register(getServicesByMonthForChart)
+
+  // Rotas de métricas (dashboard e relatório)
+  app.register(getServicesYearly)
+  app.register(getServicesMonthly)
+  app.register(getServicesDaily)
+  app.register(getTopLawyers)
+  app.register(getTopAgents)
+  app.register(getServicesReport)
 }

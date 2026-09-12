@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { BadRequestError } from 'http/_errors/bad-request-error'
+import { ConflictError } from 'http/_errors/conflict-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
 import { z } from 'zod'
@@ -37,7 +37,7 @@ export async function createTypeService(app: FastifyInstance) {
         })
 
         if (serviceType) {
-          throw new BadRequestError(
+          throw new ConflictError(
             'Tipo de serviço já cadastrado. Insira um nome único.'
           )
         }

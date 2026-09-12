@@ -61,6 +61,8 @@ app.register(fastifyCors, {
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
+  // Permite ao frontend ler o nome do arquivo do relatório em PDF
+  exposedHeaders: ['Content-Disposition'],
 })
 
 app.register(fastifyCookie)

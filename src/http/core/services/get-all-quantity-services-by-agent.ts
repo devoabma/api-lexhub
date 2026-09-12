@@ -1,8 +1,8 @@
-import dayjs from 'dayjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { auth } from 'http/middlewares/auth'
-import { prisma } from 'lib/prisma'
+import { currentDate, monthPeriod, previousMonth } from 'utils/metrics/period'
+import { countServices } from 'utils/metrics/queries'
 import { z } from 'zod'
 
 export async function getAllQuantityServicesByAgent(app: FastifyInstance) {
@@ -33,57 +33,23 @@ export async function getAllQuantityServicesByAgent(app: FastifyInstance) {
 
         const { id } = request.params
 
-        // Obtém o total geral de atendimentos do funcionário
-        const servicesByAgent = await prisma.services.count({
-          where: {
-            agentId: id,
-          },
-        })
+        // Mês atual e anterior no fuso da OAB Maranhão
+        const { year, month } = currentDate()
+        const previous = previousMonth(year, month)
 
-        // Obtém a data atual
-        const now = dayjs()
-
-        // Obtém o primeiro dia do mês atual
-        const startOfMonth = now.startOf('month').toDate()
-
-        // Obtém o último dia do mês atual
-        const endOfMonth = now.endOf('month').toDate()
-
-        // Obtém o total de atendimentos no mês do funcionário
-        const servicesInMonth = await prisma.services.count({
-          where: {
-            agentId: id,
-            createdAt: {
-              gte: startOfMonth,
-              lte: endOfMonth,
-            },
-          },
-        })
-
-        const startOfPreviousMonth = now
-          .subtract(1, 'month')
-          .startOf('month')
-          .toDate()
-        const endOfPreviousMonth = now
-          .subtract(1, 'month')
-          .endOf('month')
-          .toDate()
-
-        // Obtém o total de atendimentos no mês anterior do funcionário
-        const servicesInPreviousMonth = await prisma.services.count({
-          where: {
-            agentId: id,
-            createdAt: {
-              gte: startOfPreviousMonth,
-              lte: endOfPreviousMonth,
-            },
-          },
-        })
+        const [totalGeneral, totalOnMonth, totalOnPreviousMonth] =
+          await Promise.all([
+            countServices(null, { agentId: id }),
+            countServices(monthPeriod(year, month), { agentId: id }),
+            countServices(monthPeriod(previous.year, previous.month), {
+              agentId: id,
+            }),
+          ])
 
         return reply.status(200).send({
-          totalGeneral: servicesByAgent,
-          totalOnMonth: servicesInMonth,
-          totalOnPreviousMonth: servicesInPreviousMonth,
+          totalGeneral,
+          totalOnMonth,
+          totalOnPreviousMonth,
         })
       }
     )

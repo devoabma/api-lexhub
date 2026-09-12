@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { UnauthorizedError } from 'http/_errors/unauthorized-error'
+import { BadRequestError } from 'http/_errors/bad-request-error'
 import { auth } from 'http/middlewares/auth'
 import { API_PROTHEUS_FIN_URL } from 'lib/axios'
 import { prisma } from 'lib/prisma'
@@ -78,7 +78,7 @@ export async function createServiceExternal(app: FastifyInstance) {
             })
 
             if (!type) {
-              throw new UnauthorizedError(
+              throw new BadRequestError(
                 'Tipo de serviço não encontrado. Verifique os dados e tente novamente.'
               )
             }

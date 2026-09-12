@@ -1,7 +1,7 @@
 import { compare, hash } from 'bcryptjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { UnauthorizedError } from 'http/_errors/unauthorized-error'
+import { BadRequestError } from 'http/_errors/bad-request-error'
 import { prisma } from 'lib/prisma'
 import { z } from 'zod'
 
@@ -32,7 +32,7 @@ export async function resetPassword(app: FastifyInstance) {
       })
 
       if (!tokenFromCode || tokenFromCode.code !== code) {
-        throw new UnauthorizedError(
+        throw new BadRequestError(
           'Código de redefinição de senha inválido. Verifique e tente novamente.'
         )
       }
@@ -45,7 +45,7 @@ export async function resetPassword(app: FastifyInstance) {
       })
 
       if (!agent) {
-        throw new UnauthorizedError(
+        throw new BadRequestError(
           'Nenhum funcionário encontrado. Verifique as informações e tente novamente.'
         )
       }
@@ -54,7 +54,7 @@ export async function resetPassword(app: FastifyInstance) {
       const isSamePassword = await compare(password, agent.passwordHash)
 
       if (isSamePassword) {
-        throw new UnauthorizedError(
+        throw new BadRequestError(
           'A nova senha deve ser diferente da atual. Escolha outra senha e tente novamente.'
         )
       }

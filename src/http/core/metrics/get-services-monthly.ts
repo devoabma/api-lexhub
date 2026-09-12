@@ -4,32 +4,35 @@ import { auth } from 'http/middlewares/auth'
 import { currentDate } from 'utils/metrics/period'
 import { countServicesPerMonth } from 'utils/metrics/queries'
 import { yearQuerySchema } from 'utils/metrics/schemas'
-import z from 'zod'
+import { z } from 'zod'
 
-export async function getServicesByMonthForChart(app: FastifyInstance) {
+export async function getServicesMonthly(app: FastifyInstance) {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
     .get(
-      '/services/monthly',
+      '/metrics/services/monthly',
       {
         schema: {
-          tags: ['services'],
-          summary: 'Busca a quantidade de atendimentos por mês de um ano',
-          description:
-            'Depreciada: use `GET /metrics/services/monthly`. Sem `year`, usa o ano atual.',
-          deprecated: true,
+          tags: ['metrics'],
+          summary: 'Quantidade de atendimentos por mês de um ano',
+          description: 'Sem `year`, usa o ano atual.',
           security: [{ bearerAuth: [] }],
           querystring: z.object({
             year: yearQuerySchema.optional(),
           }),
           response: {
-            200: z.array(
-              z.object({
-                data: z.string(),
-                services: z.number(),
-              })
-            ),
+            200: z.object({
+              year: z.number(),
+              total: z.number(),
+              months: z.array(
+                z.object({
+                  month: z.number(),
+                  label: z.string(),
+                  total: z.number(),
+                })
+              ),
+            }),
           },
         },
       },
@@ -39,12 +42,9 @@ export async function getServicesByMonthForChart(app: FastifyInstance) {
         const year = request.query.year ?? currentDate().year
 
         const months = await countServicesPerMonth(year)
+        const total = months.reduce((sum, month) => sum + month.total, 0)
 
-        return reply
-          .status(200)
-          .send(
-            months.map(({ label, total }) => ({ data: label, services: total }))
-          )
+        return reply.status(200).send({ year, total, months })
       }
     )
 }

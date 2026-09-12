@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { BadRequestError } from 'http/_errors/bad-request-error'
+import { UnauthorizedError } from 'http/_errors/unauthorized-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
 import z from 'zod'
@@ -44,9 +44,10 @@ export async function getProfile(app: FastifyInstance) {
           },
         })
 
+        // Funcionário removido entre a validação da sessão e esta consulta
         if (!agent) {
-          throw new BadRequestError(
-            'Funcionário não encontrado. Verifique os dados e tente novamente.'
+          throw new UnauthorizedError(
+            'Token inválido ou expirado. Faça login novamente.'
           )
         }
 

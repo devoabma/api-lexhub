@@ -1,8 +1,8 @@
-import dayjs from 'dayjs'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { auth } from 'http/middlewares/auth'
-import { prisma } from 'lib/prisma'
+import { currentDate, dayPeriod, shiftDate } from 'utils/metrics/period'
+import { countServices } from 'utils/metrics/queries'
 import { z } from 'zod'
 
 export async function getAllQuantityServicesPerDay(app: FastifyInstance) {
@@ -27,33 +27,13 @@ export async function getAllQuantityServicesPerDay(app: FastifyInstance) {
       async (request, reply) => {
         await request.getCurrentAgentId()
 
-        const now = dayjs()
+        // Hoje e ontem no fuso da OAB Maranhão
+        const { date: today } = currentDate()
 
-        // Busca o intervalo do dia atual (00:00 até 23:59)
-        const startOfDay = now.startOf('day').toDate()
-        const endOfDay = now.endOf('day').toDate()
-
-        // Busca o intervalo do dia anterior (00:00 até 23:59)
-        const startOfLastDay = now.subtract(1, 'day').startOf('day').toDate()
-        const endOfLastDay = now.subtract(1, 'day').endOf('day').toDate()
-
-        const totalTheDay = await prisma.services.count({
-          where: {
-            createdAt: {
-              gte: startOfDay,
-              lte: endOfDay,
-            },
-          },
-        })
-
-        const totalLastDay = await prisma.services.count({
-          where: {
-            createdAt: {
-              gte: startOfLastDay,
-              lte: endOfLastDay,
-            },
-          },
-        })
+        const [totalTheDay, totalLastDay] = await Promise.all([
+          countServices(dayPeriod(today)),
+          countServices(dayPeriod(shiftDate(today, -1))),
+        ])
 
         return reply.status(200).send({
           totalTheDay,

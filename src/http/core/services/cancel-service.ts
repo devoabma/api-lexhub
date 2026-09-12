@@ -1,6 +1,8 @@
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
-import { UnauthorizedError } from 'http/_errors/unauthorized-error'
+import { ConflictError } from 'http/_errors/conflict-error'
+import { ForbiddenError } from 'http/_errors/forbidden-error'
+import { NotFoundError } from 'http/_errors/not-found-error'
 import { auth } from 'http/middlewares/auth'
 import { prisma } from 'lib/prisma'
 import z from 'zod'
@@ -25,7 +27,7 @@ export async function cancelService(app: FastifyInstance) {
         },
       },
       async (request, reply) => {
-        await request.getCurrentAgentId()
+        const agent = await request.getCurrentAgent()
 
         const { id } = request.params
 
@@ -34,28 +36,30 @@ export async function cancelService(app: FastifyInstance) {
         })
 
         if (!service) {
-          throw new UnauthorizedError(
+          throw new NotFoundError(
             'O serviço solicitado não foi localizado em nossa base de dados. Por favor, verifique as informações e tente novamente.'
           )
         }
 
+        // Autorização antes do status: não revela o estado de atendimentos
+        // de terceiros a quem não pode agir sobre eles
+        if (service.agentId !== agent.id && agent.role !== 'ADMIN') {
+          throw new ForbiddenError(
+            'Somente o funcionário que registrou o atendimento ou um administrador pode cancelá-lo.'
+          )
+        }
+
         if (service.status !== 'OPEN') {
-          throw new UnauthorizedError(
+          throw new ConflictError(
             'O serviço solicitado já foi finalizado. Por favor, verifique as informações e tente novamente.'
           )
         }
 
-        try {
-          await prisma.services.delete({
-            where: { id },
-          })
+        await prisma.services.delete({
+          where: { id },
+        })
 
-          return reply.status(204).send()
-        } catch (err) {
-          throw new UnauthorizedError(
-            'Ocorreu um erro para cancelar o atendimento. Por favor, verifique os dados informados e tente novamente.'
-          )
-        }
+        return reply.status(204).send()
       }
     )
 }

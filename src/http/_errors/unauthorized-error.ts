@@ -1,5 +1,5 @@
 export class UnauthorizedError extends Error {
   constructor(message?: string) {
-    super(message ?? ' Acesso não autorizado, tente novamente.')
+    super(message ?? 'Acesso não autorizado, tente novamente.')
   }
 }
