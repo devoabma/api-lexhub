@@ -5,6 +5,7 @@ import { UnprocessableEntityError } from 'http/_errors/unprocessable-entity-erro
 import { auth } from 'http/middlewares/auth'
 import { API_PROTHEUS_DATA_URL, API_PROTHEUS_FIN_URL } from 'lib/axios'
 import { prisma } from 'lib/prisma'
+import { assertLawyerHasNoOpenService } from 'utils/services/assert-no-open-service'
 import { z } from 'zod'
 
 interface LawyersProps {
@@ -25,7 +26,7 @@ export async function consultLawyer(app: FastifyInstance) {
           summary: 'Consulta inadimplência do advogado',
           security: [{ bearerAuth: [] }],
           body: z.object({
-            oab: z.string(),
+            oab: z.string().trim().min(1),
           }),
           response: {
             200: z.object({
@@ -38,6 +39,9 @@ export async function consultLawyer(app: FastifyInstance) {
         await request.getCurrentAgentId()
 
         const { oab } = request.body
+
+        // Com atendimento em aberto, nem consulta o Protheus
+        await assertLawyerHasNoOpenService(oab)
 
         // Busca na API do Protheus se o advogado está adimplente
         const { data } = await API_PROTHEUS_FIN_URL(`/${oab}`)

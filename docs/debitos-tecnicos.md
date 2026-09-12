@@ -19,7 +19,7 @@ Ao propor uma mudança no OpenSpec, cite o ID (ex.: "resolve DT-02").
 | [DT-10](#dt-10) | 🔴 | Negócio | "Atendimento único" ao inadimplente não é garantido pela API |
 | [DT-11](#dt-11) | ✅ | Negócio | ~~Gráfico mensal soma todos os anos e carrega a tabela inteira~~ (change `dashboard-metrics-report`) |
 | [DT-12](#dt-12) | 🟠 | Negócio | Criação de atendimento sem transação |
-| [DT-13](#dt-13) | 🟠 | Negócio | `lawyers.email` único quebra com dados do Protheus; OAB sem normalização |
+| [DT-13](#dt-13) | ◐ | Negócio | `lawyers.email` único quebra com dados do Protheus; OAB sem normalização completa |
 | [DT-14](#dt-14) | ✅ | Negócio | ~~E-mail de boas-vindas enviado antes de gravar o funcionário~~ (change `tratar-falha-envio-email`) |
 | [DT-15](#dt-15) | ◐ | Negócio | ~~Qualquer funcionário finaliza/cancela atendimento de outro~~; cancelamento sem auditoria |
 | [DT-16](#dt-16) | ✅ | Negócio | ~~Métricas dependem do fuso horário do servidor~~ (change `dashboard-metrics-report`) |
@@ -148,11 +148,12 @@ sem atendimento (no externo, o advogado é criado antes mesmo de validar os tipo
 **Sugestão:** `prisma.$transaction` + `services.create({ data: { serviceTypes: { createMany } } })`.
 
 <a id="dt-13"></a>
-### DT-13 🟠 Unicidade de e-mail de advogado e formato da OAB
+### DT-13 ◐ Unicidade de e-mail de advogado e formato da OAB
 
 `lawyers.email` é `UNIQUE`. Se o Protheus devolver e-mail vazio ou compartilhado, o segundo
-advogado não pode ser cadastrado (erro Prisma P2002 → 500). A OAB é usada como veio
-(sem trim/normalização), permitindo duplicatas lógicas ("12345" × "12.345").
+advogado não pode ser cadastrado (erro Prisma P2002 → 500). A OAB passou a ser usada sem
+espaços no início e no fim (change `atendimento-aberto-unico-e-trim-oab`), mas segue sem
+outra normalização, permitindo duplicatas lógicas ("12345" × "12.345").
 Dados do advogado local nunca são atualizados a partir do Protheus.
 **Sugestão:** remover unicidade do e-mail, normalizar OAB, atualizar nome/e-mail no atendimento.
 

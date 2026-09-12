@@ -4,6 +4,7 @@ import { BadRequestError } from 'http/_errors/bad-request-error'
 import { auth } from 'http/middlewares/auth'
 import { API_PROTHEUS_DATA_URL } from 'lib/axios'
 import { prisma } from 'lib/prisma'
+import { assertLawyerHasNoOpenService } from 'utils/services/assert-no-open-service'
 import { z } from 'zod'
 
 interface LawyersProps {
@@ -26,7 +27,7 @@ export async function createService(app: FastifyInstance) {
           summary: 'Criação de um novo atendimento',
           security: [{ bearerAuth: [] }],
           body: z.object({
-            oab: z.string(),
+            oab: z.string().trim().min(1),
             serviceTypeId: z.array(z.string().cuid()),
             observation: z.string().optional(),
             assistance: z.enum(['PERSONALLY', 'REMOTE']),
@@ -41,6 +42,9 @@ export async function createService(app: FastifyInstance) {
         const agentId = await request.getCurrentAgentId()
 
         const { oab, serviceTypeId, observation, assistance } = request.body
+
+        // Um atendimento em aberto por advogado
+        await assertLawyerHasNoOpenService(oab)
 
         // Verifica se o advogado já está cadastrado no banco de dados
         let lawyer = await prisma.lawyer.findUnique({

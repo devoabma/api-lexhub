@@ -189,11 +189,14 @@ Body `{ "name": "mín. 6 caracteres" }`. `204` · `400` (nome igual ao atual) ·
 
 ### `POST /services/consult/lawyer` 🔑
 
-Body `{ "oab": "12345" }`. Consulta Protheus (financeiro + cadastro).
+Body `{ "oab": "12345" }` (espaços no início e no fim são removidos). Consulta Protheus
+(financeiro + cadastro).
 
 | Status | Quando |
 |---|---|
 | 200 | `{ "name": "Nome do Advogado" }` — adimplente |
+| 400 | OAB vazia (ou só com espaços) |
+| 409 | Advogado já tem atendimento em aberto (mensagem com quem abriu e quando); o Protheus não é consultado |
 | 422 | Inadimplente (mensagem com o nome; inclui data do atendimento excepcional anterior, se houver) |
 | 404 | Protheus indisponível ou advogado não encontrado |
 
@@ -209,14 +212,18 @@ Body `{ "oab": "12345" }`. Consulta Protheus (financeiro + cadastro).
 }
 ```
 
-Cadastra o advogado a partir do Protheus se ainda não existir localmente.
-`201` · `400` (tipo de serviço inexistente) · `404` (falha Protheus).
+Cadastra o advogado a partir do Protheus se ainda não existir localmente. A `oab` é usada
+sem espaços no início e no fim.
+`201` · `400` (tipo de serviço inexistente ou OAB vazia) · `409` (advogado já tem atendimento
+em aberto) · `404` (falha Protheus).
 **Não verifica adimplência** — o frontend deve chamar `/services/consult/lawyer` antes.
 
 ### `POST /services/external` 🔑
 
 Igual a `POST /services`, mais `name` e `email` do advogado (usados só se a OAB não existir localmente).
 Consulta a API financeira e, se inadimplente, grava `lawyers.restrictedServiceCount = now()`.
+Também responde `409` se o advogado já tiver atendimento em aberto — antes de cadastrar o
+advogado ou marcar `restrictedServiceCount`.
 
 ### `GET /services/all` 🔑
 

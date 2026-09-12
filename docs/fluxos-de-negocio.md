@@ -18,12 +18,14 @@ sequenceDiagram
   participant DB as PostgreSQL
 
   F->>API: POST /services/consult/lawyer { oab }
+  API->>DB: atendimento OPEN para a oab? (409 se houver)
   API->>FIN: GET /{oab}
   API->>DATA: GET /?idOrg=10&param={oab}
   API->>DB: lawyers.restrictedServiceCount (oab)
   alt adimplente
     API-->>F: 200 { name }
     F->>API: POST /services { oab, serviceTypeId[], assistance, observation }
+    API->>DB: atendimento OPEN para a oab? (409 se houver)
     API->>DB: busca lawyer por oab
     opt não existe localmente
       API->>DATA: GET /?idOrg=10&param={oab}
@@ -40,6 +42,11 @@ sequenceDiagram
 
 A inadimplência responde `422` (regra de negócio sobre o advogado), não `401`: a
 sessão do funcionário continua válida.
+
+Um advogado só pode ter **um atendimento em aberto** por vez. A consulta e as duas rotas
+de criação respondem `409` enquanto houver um `OPEN` para a OAB — aberto por qualquer
+funcionário —, informando quem o abriu e quando; a trava sai quando ele é finalizado ou
+cancelado. A OAB é usada sem espaços no início e no fim.
 
 Depois de criado, o atendimento aparece em `GET /services/all` como `OPEN` e pode ser:
 
