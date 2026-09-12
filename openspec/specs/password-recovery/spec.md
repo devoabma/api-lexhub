@@ -12,7 +12,7 @@ O sistema SHALL receber `POST /agents/password/recover` com `{ email }` (rota p�
 
 Quando o e-mail pertence a um funcionário, o sistema MUST:
 1. gerar um código de 6 caracteres (`A-Z0-9`) e gravá-lo na tabela `tokens` com `type = PASSWORD_RECOVER`;
-2. enviar o e-mail "🔄 Redefinição de Senha - OAB Atende" (remetente `oabatende@oabma.com.br`) com o código e o link `${WEB_URL}/reset-password?code=<código>`;
+2. enviar o e-mail "🔄 Redefinição de Senha - OAB Atende" (remetente `oabatende@oabma.org.br`) com o código e o link `${WEB_URL}/reset-password?code=<código>`;
 3. agendar, em memória do processo (`setTimeout`), a exclusão do token após 2 minutos.
 
 Fora de produção, o e-mail é enviado para um endereço fixo de desenvolvedor e o código é impresso no console.

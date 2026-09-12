@@ -54,7 +54,7 @@ export async function createAccountService(app: FastifyInstance) {
         try {
           // Envia email de boas vindas para o novo funcionário com seus dados
           await resend.emails.send({
-            from: '📧 OAB Atende <oabatende@oabma.com.br>',
+            from: '📧 OAB Atende <oabatende@oabma.org.br>',
             to: email,
             subject: '🎉 Bem-vindo à equipe! Aqui estão suas informações.',
             react: AgentRegistrationEmail({

@@ -46,7 +46,7 @@ export async function requestPasswordRecover(app: FastifyInstance) {
       })
 
       await resend.emails.send({
-        from: '📧 OAB Atende <oabatende@oabma.com.br>',
+        from: '📧 OAB Atende <oabatende@oabma.org.br>',
         // FIXME: Em ambiente de desenvolvimento envia para o email do desenvolvedor
         to: env.NODE_ENV === 'production' ? email : 'hilquiasfmelo@hotmail.com',
         subject: '🔄 Redefinição de Senha - OAB Atende',

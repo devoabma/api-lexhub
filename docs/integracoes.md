@@ -32,7 +32,7 @@ Não há distinção entre "advogado não existe" e "Protheus fora do ar" ([DT-2
 
 ## Resend (e-mail)
 
-Cliente em `src/lib/resend.ts` (`RESEND_API_KEY`). Remetente: `📧 OAB Atende <oabatende@oabma.com.br>`
+Cliente em `src/lib/resend.ts` (`RESEND_API_KEY`). Remetente: `📧 OAB Atende <oabatende@oabma.org.br>`
 (o domínio precisa estar verificado no Resend).
 
 | Template (`src/utils/emails/`) | Assunto | Disparado por | Dados |
